@@ -15,36 +15,48 @@ namespace dsa {
         UNKNOWN_ID
     };
 
+    enum class format {
+        NONE,    // ascending  - ^\d+$
+        METERS,  // ascending  - ^\d+,\d\d$
+        MINUTES, // descending - ^\d+:\d\d$
+        SECONDS  // descending - ^\d+,\d$
+    };
+
     struct entry {
     public:
         constexpr entry(types::entry_type const * entry) noexcept : ptr_{entry} {}
-        constexpr auto id() const noexcept { return *ptr_; }
+        constexpr auto & id() const noexcept { return *ptr_; }
         constexpr auto values() const noexcept { return ptr_ + 1; }
-        constexpr auto operator[](std::size_t pos) const noexcept { return values()[pos]; }
-    protected:
+        constexpr auto & operator[](std::size_t pos) const noexcept { return values()[pos]; }
+    private:
+        types::entry_type const * const ptr_;
+    };
+
+    struct entry_iterator {
+    public:
+        constexpr entry_iterator(types::entry_type const * start, types::count_type tries) noexcept : ptr_{start}, tries_{tries} {}
+        constexpr auto operator!=(types::entry_type const * sentinel) const noexcept { return ptr_ != sentinel; }
+        constexpr auto & operator++() noexcept { return ptr_ += tries_, *this; }
+        constexpr entry operator*() const noexcept { return ptr_; }
+    private:
         types::entry_type const * ptr_;
+        types::count_type const tries_;
     };
 
     class discipline {
-        using eval_func = score (*)(types::entry_type * values, std::array<types::entry_type, 3> requirements) noexcept; // cache scores outside
-        using display_func = void (*)(types::entry_type value, char * buffer) noexcept; // only valid values + assuming buffer is big enough
-        using convert_func = types::entry_type (*)(char const * value_string) noexcept;
     public:
-        discipline(char const * name, types::count_type tries, eval_func eval, display_func display, convert_func convert); // LOAD!!!
-        void add(types::entry_type id); // SAVING!!!
-        void change_id(std::size_t pos, types::entry_type new_id); // SAVING!!!
-        void change_value(std::size_t pos, types::count_type value_pos, char const * new_value); // SAVING!!!
-        score eval(types::entry_type * values, types::age_type age, bool male) const noexcept;
-        void display(types::entry_type value, char * buffer) const noexcept; // handle -1
-        constexpr entry operator[](std::size_t pos) const noexcept { return entries_.data() + pos * (tries + 1); }
+        discipline(char const * name, types::count_type tries, format format/*, requirements*/); // LOAD!!!
+        bool add(types::entry_type id) noexcept; // checks for existence and fills empty values with -1
+        void change(types::entry_type const & ref, types::entry_type value); // SAVING!!!
+        constexpr entry_iterator begin() const noexcept { return {entries_.data(), tries}; }
+        constexpr types::entry_type const * end() const noexcept { return entries_.data() + entries_.size(); }
     private:
+        // requirements
         std::vector<types::entry_type> entries_;
-        eval_func eval_;
-        display_func display_;
-        convert_func convert_;
     public:
         char const * const name; // used for filename
         types::count_type const tries;
+        format const format;
     };
 
     // TODO participants
