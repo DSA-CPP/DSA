@@ -1,9 +1,10 @@
 #ifndef _DSA_DATA_HPP_
 #define _DSA_DATA_HPP_
 
+#include <cstdint>
 #include <array>
 #include <vector>
-#include "types.hpp"
+#include "utility.hpp"
 
 namespace dsa {
 
@@ -22,44 +23,26 @@ namespace dsa {
         SECONDS  // descending - ^\d+,\d$
     };
 
-    struct entry {
-    public:
-        constexpr entry(types::entry_type const * entry) noexcept : ptr_{entry} {}
-        constexpr auto & id() const noexcept { return *ptr_; }
-        constexpr auto values() const noexcept { return ptr_ + 1; }
-        constexpr auto & operator[](std::size_t pos) const noexcept { return values()[pos]; }
-    private:
-        types::entry_type const * const ptr_;
-    };
-
-    struct entry_iterator {
-    public:
-        constexpr entry_iterator(types::entry_type const * start, types::count_type tries) noexcept : ptr_{start}, tries_{tries} {}
-        constexpr auto operator!=(types::entry_type const * sentinel) const noexcept { return ptr_ != sentinel; }
-        constexpr auto & operator++() noexcept { return ptr_ += tries_, *this; }
-        constexpr entry operator*() const noexcept { return ptr_; }
-    private:
-        types::entry_type const * ptr_;
-        types::count_type const tries_;
-    };
-
     class discipline {
     public:
-        discipline(char const * name, types::count_type tries, format format/*, requirements*/); // LOAD!!!
-        bool add(types::entry_type id) noexcept; // checks for existence and fills empty values with -1
-        void change(types::entry_type const & ref, types::entry_type value); // SAVING!!!
-        constexpr entry_iterator begin() const noexcept { return {entries_.data(), tries}; }
-        constexpr types::entry_type const * end() const noexcept { return entries_.data() + entries_.size(); }
-    private:
-        // requirements
-        std::vector<types::entry_type> entries_;
+        using type = typename std::uint16_t;
+        using count = typename std::uint8_t;
+        using level_array = typename std::array<type, 3>; // bronce, silver, gold
+        using requirements_array = typename std::array<std::array<level_array, 3>, 2>; // 12-13, 14-15, 16-17 | male, female
     public:
-        char const * const name; // used for filename
-        types::count_type const tries;
+        discipline(char const * name, count tries, format format, requirements_array const & requirements); // loads from file
+        level_array levels(bool male, std::uint8_t age) const; // throws on invalid age
+        editor<type> edit(entry<type const> entry) noexcept; // saves
+        constexpr entry_iterator<type const, count> begin() const noexcept { return {entries_.data(), tries}; }
+        constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
+    private:
+        std::vector<type> entries_;
+        requirements_array const & requirements_;
+    public:
+        char const * const name;
+        count const tries;
         format const format;
     };
-
-    // TODO participants
 
 }
 
