@@ -3,14 +3,13 @@
 
 #include <concepts>
 #include <optional>
-#include <span>
 
 namespace dsa {
 
     template<std::unsigned_integral T>
-    constexpr std::optional<T> value(char const * id_string) noexcept {
+    constexpr std::optional<T> value(char const * string) noexcept {
         T accumulate{};
-        for(char c = *id_string; *id_string; c = *++id_string) {
+        for(char c = *string; *string; c = *++string) {
             if(c < '0' || c > '9') continue;
             T v{static_cast<T>(accumulate * 10 + c - '0')};
             if(v < accumulate) return {};
@@ -33,12 +32,10 @@ namespace dsa {
     template<typename T>
     struct editor : entry<T> {
     public:
-        using func = void (*)();
-    public:
-        constexpr editor(T * first_element, func f) noexcept : entry<T>{first_element}, f_{f} {}
+        constexpr editor(T * first_element, void (* f)()) noexcept : entry<T>{first_element}, f_{f} {}
         constexpr ~editor() { f_(); }
     private:
-        func const f_;
+        void (* const f_)();
     };
 
     template<typename T, std::integral U>
