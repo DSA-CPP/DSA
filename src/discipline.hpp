@@ -1,5 +1,5 @@
-#ifndef _DSA_DATA_HPP_
-#define _DSA_DATA_HPP_
+#ifndef _DSA_DISCIPLINE_HPP_
+#define _DSA_DISCIPLINE_HPP_
 
 #include <cstdint>
 #include <array>
@@ -12,7 +12,7 @@ namespace dsa {
     using entry_type = typename std::uint16_t;
     using count_type = typename std::uint16_t;
     using level_array = typename std::array<entry_type, 3>; // bronce, silver, gold
-    using requirements_array = typename std::array<std::array<level_array, 6>, 2>; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-24 | male, female
+    using requirements_array = typename std::array<std::array<level_array, 6>, 2>; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-21 | male, female
 
     enum class score {
         INVALID,
@@ -29,30 +29,61 @@ namespace dsa {
         SECONDS  // descending - ^\d+,\d$
     };
 
+    constexpr auto && levels(requirements_array const & requirements, bool male, std::uint8_t age) {
+        if(age < 10 || age > 21) throw "Invalid age";
+        return requirements[male][age / 2 - 5];
+    }
+
     class formatter {
     public:
         constexpr formatter(format format) noexcept : format_{format} {}
-        entry_type value(char const * string) const noexcept;
-        void display(entry_type value, char * buffer) const noexcept;
-        score eval(std::span<entry_type> values) const noexcept;
+
+        constexpr void parse(entry_type value, char * buffer) const noexcept {
+            switch(format_) {
+            case format::NONE:
+                buffer = display(value, buffer);
+                break;
+            case format::METERS:
+                buffer = display(value / 100u, buffer);
+                *buffer++ = ',';
+                buffer = display(value % 100u, buffer);
+                break;
+            case format::MINUTES:
+                buffer = display(value / 100u, buffer);
+                *buffer++ = ':';
+                buffer = display(value % 100u, buffer);
+                break;
+            case format::SECONDS:
+                buffer = display(value / 10u, buffer);
+                *buffer++ = ',';
+                buffer = display(value % 10u, buffer);
+                break;
+            }
+            *buffer = 0;
+        }
+
+        constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept;
     private:
         format const format_;
     };
 
     class discipline {
     public:
-        discipline(char const * name, count_type tries, format format, requirements_array const & requirements); // loads from file
-        level_array levels(bool male, std::uint8_t age) const; // throws on invalid age
-        editor<entry_type> edit(entry<entry_type const> entry) noexcept; // saves
+        constexpr discipline(char const * name, requirements_array const & requirements, count_type tries, format format, std::vector<entry_type> const & entries = {}) noexcept
+            : entries_{entries}, name{name}, requirements{requirements}, tries{tries}, formatter{format} {}
+        constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + tries, -1); return entries_.data() + size; }
+        constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), tries}; }
         constexpr entry_iterator<entry_type const, count_type> begin() const noexcept { return {entries_.data(), tries}; }
+        constexpr auto end()       noexcept { return entries_.data() + entries_.size(); }
         constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
+        constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
     private:
         std::vector<entry_type> entries_;
-        requirements_array const & requirements_;
     public:
-        char const * const name;
+        char const * const name; // also filename (should be unique)
+        requirements_array const & requirements;
         count_type const tries;
-        format const format;
+        formatter const formatter;
     };
 
 }

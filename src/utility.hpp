@@ -2,6 +2,8 @@
 #define _DSA_UTILITY_HPP_
 
 #include <concepts>
+#include <fstream>
+#include <iterator>
 #include <optional>
 
 namespace dsa {
@@ -18,6 +20,15 @@ namespace dsa {
         return accumulate;
     }
 
+    constexpr char * display(std::unsigned_integral auto value, char * buffer) noexcept {
+        char bp[20], * sp{bp};
+        for(; value; value /= 10)
+            *sp++ = static_cast<char>(value % 10) + '0';
+        while(bp != sp)
+            *buffer++ = *--sp;
+        return buffer;
+    }
+
     template<typename T>
     struct entry {
     public:
@@ -25,17 +36,9 @@ namespace dsa {
         constexpr auto & id() const noexcept { return *ptr_; }
         constexpr auto values() const noexcept { return ptr_ + 1; }
         constexpr auto & operator[](std::size_t pos) const noexcept { return values()[pos]; }
+        constexpr operator T *() const noexcept { return ptr_; }
     private:
         T * const ptr_;
-    };
-
-    template<typename T>
-    struct editor : entry<T> {
-    public:
-        constexpr editor(T * first_element, void (* f)()) noexcept : entry<T>{first_element}, f_{f} {}
-        constexpr ~editor() { f_(); }
-    private:
-        void (* const f_)();
     };
 
     template<typename T, std::integral U>
@@ -48,6 +51,31 @@ namespace dsa {
     private:
         T * ptr_;
         U const tries_;
+    };
+
+    template<typename T>
+    class io {
+    public:
+        constexpr io(char const * filename) : filename_{filename} {}
+
+        std::vector<T> load() const noexcept {
+            std::basic_ifstream<T> file{filename_, std::ios_base::binary};
+            if(file.good()) return {std::istream_iterator{file}, {}};
+            return {};
+        }
+
+        void save(entry<T> entry, std::streamsize tries) const noexcept {
+            std::basic_ostream<T> file{filename_, std::ios_base::binary | std::ios_base::app};
+            if(file.good()) file.write(entry, tries);
+        }
+
+        void save(std::vector<T> const & vec) const noexcept {
+            std::basic_ostream<T> file{filename_, std::ios_base::binary};
+            if(file.good()) file.write(vec.data(), vec.size());
+        }
+
+    private:
+        char const * filename_;
     };
 
 }
