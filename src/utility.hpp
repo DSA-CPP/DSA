@@ -20,7 +20,7 @@ namespace dsa {
         return accumulate;
     }
 
-    constexpr char * display(std::unsigned_integral auto value, char * buffer) noexcept {
+    constexpr auto display(std::unsigned_integral auto value, char * buffer) noexcept {
         char bp[20], * sp{bp};
         for(; value; value /= 10)
             *sp++ = static_cast<char>(value % 10) + '0';
