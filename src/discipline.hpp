@@ -2,6 +2,7 @@
 #define _DSA_DISCIPLINE_HPP_
 
 #include <cstdint>
+#include <algorithm>
 #include <array>
 #include <span>
 #include <vector>
@@ -29,16 +30,14 @@ namespace dsa {
         SECONDS  // descending - ^\d+,\d$
     };
 
-    constexpr auto && levels(requirements_array const & requirements, bool male, std::uint8_t age) {
-        if(age < 10 || age > 21) throw "Invalid age";
-        return requirements[male][age / 2 - 5];
-    }
+    constexpr auto && levels(requirements_array const & requirements, bool male, std::uint8_t age) { return requirements[male].at(age / 2 - 5); }
 
     class formatter {
     public:
         constexpr formatter(format format) noexcept : format_{format} {}
+        constexpr entry_type operator()(char const * string) const noexcept { return value<entry_type>(string).value_or(-1); }
 
-        constexpr void parse(entry_type value, char * buffer) const noexcept {
+        constexpr void operator()(entry_type value, char * buffer) const noexcept {
             switch(format_) {
             case format::NONE:
                 buffer = display(value, buffer);
@@ -62,7 +61,16 @@ namespace dsa {
             *buffer = 0;
         }
 
-        constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept;
+        constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept {
+            switch(format_) {
+            case format::NONE:
+            case format::METERS:
+                return static_cast<score>(std::ranges::upper_bound(levels, *std::ranges::max_element(values))                 - levels.begin());
+            case format::MINUTES:
+            case format::SECONDS:
+                return static_cast<score>(std::ranges::upper_bound(levels, *std::ranges::min_element(values), std::greater{}) - levels.begin());
+            }
+        }
     private:
         format const format_;
     };
