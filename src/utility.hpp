@@ -32,31 +32,31 @@ namespace dsa {
     template<typename T>
     struct entry {
     public:
-        constexpr entry(T * first_element) noexcept : ptr_{first_element} {}
+        constexpr entry(T * first_element = nullptr) noexcept : ptr_{first_element} {}
         constexpr auto & id() const noexcept { return *ptr_; }
         constexpr auto values() const noexcept { return ptr_ + 1; }
         constexpr auto & operator[](std::size_t pos) const noexcept { return values()[pos]; }
         constexpr operator T *() const noexcept { return ptr_; }
     private:
-        T * const ptr_;
+        T * ptr_;
     };
 
     template<typename T, std::integral U>
     struct entry_iterator {
     public:
-        constexpr entry_iterator(T * start, U tries) noexcept : ptr_{start}, tries_{tries} {}
+        constexpr entry_iterator(T * start, U stride) noexcept : ptr_{start}, stride_{stride} {}
         constexpr auto operator!=(T const * sentinel) const noexcept { return ptr_ != sentinel; }
-        constexpr auto & operator++() noexcept { return ptr_ += tries_, *this; }
+        constexpr auto & operator++() noexcept { return ptr_ += stride_, *this; }
         constexpr entry<T> operator*() const noexcept { return ptr_; }
     private:
         T * ptr_;
-        U const tries_;
+        U const stride_;
     };
 
     template<typename T>
     class io {
     public:
-        constexpr io(char const * filename) : filename_{filename} {}
+        constexpr explicit io(char const * filename) : filename_{filename} {}
 
         std::vector<T> load() const noexcept {
             std::basic_ifstream<T> file{filename_, std::ios_base::binary};

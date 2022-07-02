@@ -16,10 +16,11 @@ namespace dsa {
     using requirements_array = typename std::array<std::array<level_array, 6>, 2>; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-21 | male, female
 
     enum class score {
-        INVALID,
+        NOTHING,
         BRONCE,
         SILVER,
         GOLD,
+        INVALID,
         UNKNOWN_ID
     };
 
@@ -38,25 +39,27 @@ namespace dsa {
         constexpr entry_type operator()(char const * string) const noexcept { return value<entry_type>(string).value_or(-1); }
 
         constexpr void operator()(entry_type value, char * buffer) const noexcept {
-            switch(format_) {
-            case format::NONE:
-                buffer = display(value, buffer);
-                break;
-            case format::METERS:
-                buffer = display(value / 100u, buffer);
-                *buffer++ = ',';
-                buffer = display(value % 100u, buffer);
-                break;
-            case format::MINUTES:
-                buffer = display(value / 100u, buffer);
-                *buffer++ = ':';
-                buffer = display(value % 100u, buffer);
-                break;
-            case format::SECONDS:
-                buffer = display(value / 10u, buffer);
-                *buffer++ = ',';
-                buffer = display(value % 10u, buffer);
-                break;
+            if(value != static_cast<entry_type>(-1)) {
+                switch(format_) {
+                case format::NONE:
+                    buffer = display(value, buffer);
+                    break;
+                case format::METERS:
+                    buffer = display(value / 100u, buffer);
+                    *buffer++ = ',';
+                    buffer = display(value % 100u, buffer);
+                    break;
+                case format::MINUTES:
+                    buffer = display(value / 100u, buffer);
+                    *buffer++ = ':';
+                    buffer = display(value % 100u, buffer);
+                    break;
+                case format::SECONDS:
+                    buffer = display(value / 10u, buffer);
+                    *buffer++ = ',';
+                    buffer = display(value % 10u, buffer);
+                    break;
+                }
             }
             *buffer = 0;
         }
@@ -69,19 +72,22 @@ namespace dsa {
             case format::MINUTES:
             case format::SECONDS:
                 return static_cast<score>(std::ranges::upper_bound(levels, *std::ranges::min_element(values), std::greater{}) - levels.begin());
+            default: // format_ not recognized
+                return score::INVALID;
             }
         }
     private:
-        format const format_;
+        format format_;
     };
 
     class discipline {
     public:
-        constexpr discipline(char const * name, requirements_array const & requirements, count_type tries, format format, std::vector<entry_type> const & entries = {}) noexcept
+        constexpr discipline(char const * name, requirements_array const & requirements, count_type tries, formatter format, std::vector<entry_type> const & entries = {}) noexcept
             : entries_{entries}, name{name}, requirements{requirements}, tries{tries}, formatter{format} {}
-        constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + tries, -1); return entries_.data() + size; }
-        constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), tries}; }
-        constexpr entry_iterator<entry_type const, count_type> begin() const noexcept { return {entries_.data(), tries}; }
+        constexpr count_type entry_size() const noexcept { return tries + 1; }
+        constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + entry_size(), -1); return entries_.data() + size; }
+        constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
+        constexpr entry_iterator<entry_type const, count_type> begin() const noexcept { return {entries_.data(), entry_size()}; }
         constexpr auto end()       noexcept { return entries_.data() + entries_.size(); }
         constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
