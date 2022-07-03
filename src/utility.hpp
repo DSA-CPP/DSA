@@ -6,6 +6,8 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <string>
+#include <utility>
 
 namespace dsa {
 
@@ -57,10 +59,10 @@ namespace dsa {
     template<typename T>
     class io {
     public:
-        constexpr explicit io(char const * filename) : filename_{filename} {}
+        std::string filename;
 
         bool load(std::vector<T> & buffer) const noexcept {
-            std::ifstream file{filename_, std::ios_base::binary};
+            std::ifstream file{filename, std::ios_base::binary};
             if(!file) return false;
             std::size_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
@@ -77,14 +79,11 @@ namespace dsa {
         }
 
         void save(std::span<T const> span) const noexcept { // theoretical specialization for static extent?
-            std::ofstream file{filename_, std::ios_base::binary};
+            std::ofstream file{filename, std::ios_base::binary};
             auto size = span.size();
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
             file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for equality
         }
-
-    private:
-        char const * filename_;
     };
 
 }
