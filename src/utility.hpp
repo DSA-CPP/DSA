@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iterator>
 #include <optional>
+#include <span>
 
 namespace dsa {
 
@@ -59,19 +60,20 @@ namespace dsa {
         constexpr explicit io(char const * filename) : filename_{filename} {}
 
         std::vector<T> load() const noexcept {
-            std::basic_ifstream<T> file{filename_, std::ios_base::binary};
-            if(file.good()) return {std::istream_iterator{file}, {}};
-            return {};
+            std::ifstream file{filename_, std::ios_base::binary};
+            if(!file) return {};
+            std::size_t size;
+            file.read(reinterpret_cast<char *>(&size), sizeof(size));
+            std::vector<T> vec(size); // list-init precedence requires this to circumvent init-list
+            file.read(reinterpret_cast<char *>(vec.data()), size * sizeof(T));
+            return vec;
         }
 
-        void save(entry<T> entry, std::streamsize tries) const noexcept {
-            std::basic_ostream<T> file{filename_, std::ios_base::binary | std::ios_base::app};
-            if(file.good()) file.write(entry, tries);
-        }
-
-        void save(std::vector<T> const & vec) const noexcept {
-            std::basic_ostream<T> file{filename_, std::ios_base::binary};
-            if(file.good()) file.write(vec.data(), vec.size());
+        void save(std::span<T const> data) const noexcept {
+            std::ofstream file{filename_, std::ios_base::binary};
+            auto size = data.size();
+            file.write(reinterpret_cast<char const *>(&size), sizeof(size));
+            file.write(reinterpret_cast<char const *>(data.data()), size * sizeof(T));
         }
 
     private:

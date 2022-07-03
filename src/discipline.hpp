@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
-#include <span>
 #include <vector>
 #include "utility.hpp"
 
