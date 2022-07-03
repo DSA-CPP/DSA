@@ -1,7 +1,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include "discipline.hpp"
+#include "dsa.hpp"
 
 constexpr bool strcmp(char const * s1, char const * s2) noexcept { return std::string{s1} == s2; }
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
@@ -83,14 +83,14 @@ constexpr void discipline() {
             {{1720, 1520, 1320}}
         }}
     }};
-    dsa::discipline disc{"Ausdauer-Lauf", req, 2, dsa::format::MINUTES};
+    dsa::discipline disc{0, 0, dsa::format::MINUTES, 2, req};
     auto e = (disc.add(), disc.add());
     e.id() = 42069;
     e[0] = 500;
     assert(disc.end() - *disc.begin() == 6 && disc.end() - 3 == e, "Add");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == static_cast<dsa::entry_type>(-1), "Entry");
     for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 3;
-    assert(&dsa::levels(disc.requirements, true, 12) == &req[1][1], "Levels");
+    assert(&dsa::levels({12, true}, disc.requirements) == &disc.requirements[1][1], "Levels");
 }
 
 int main() {
