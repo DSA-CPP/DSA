@@ -4,17 +4,18 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
+#include <unordered_map>
 #include <vector>
 #include "utility.hpp"
 
 namespace dsa {
 
     using entry_type = typename std::uint16_t;
-    using count_type = typename std::uint16_t;
+    using count_type = typename std::uint8_t;
     using level_array = typename std::array<entry_type, 3>; // bronce, silver, gold
     using requirements_array = typename std::array<std::array<level_array, 6>, 2>; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-21 | male, female
 
-    enum class score {
+    enum class score : count_type {
         NOTHING,
         BRONCE,
         SILVER,
@@ -23,14 +24,12 @@ namespace dsa {
         UNKNOWN_ID
     };
 
-    enum class format {
+    enum class format : count_type {
         NONE,    // ascending  - ^\d+$
         METERS,  // ascending  - ^\d+,\d\d$
         MINUTES, // descending - ^\d+:\d\d$
         SECONDS  // descending - ^\d+,\d$
     };
-
-    constexpr auto && levels(requirements_array const & requirements, bool male, std::uint8_t age) { return requirements[male].at(age / 2 - 5); }
 
     class formatter {
     public:
@@ -64,16 +63,26 @@ namespace dsa {
         }
 
         constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept {
+            entry_type best;
+            bool (*cmp)(entry_type, entry_type);
             switch(format_) {
             case format::NONE:
             case format::METERS:
-                return static_cast<score>(std::ranges::upper_bound(levels, *std::ranges::max_element(values))                 - levels.begin());
+                best = 0;
+                cmp = [](entry_type a, entry_type b) { return a < b; };
+                break;
             case format::MINUTES:
             case format::SECONDS:
-                return static_cast<score>(std::ranges::upper_bound(levels, *std::ranges::min_element(values), std::greater{}) - levels.begin());
+                best = -1;
+                cmp = [](entry_type a, entry_type b) { return a > b; };
+                break;
             default: // format_ not recognized
                 return score::INVALID;
             }
+            for(auto e : values)
+                if(e != static_cast<entry_type>(-1) && cmp(best, e))
+                    best = e;
+            return static_cast<score>(std::ranges::upper_bound(levels, best, cmp) - levels.begin());
         }
     private:
         format format_;
@@ -81,8 +90,8 @@ namespace dsa {
 
     class discipline {
     public:
-        constexpr discipline(char const * name, requirements_array const & requirements, count_type tries, formatter format, std::vector<entry_type> const & entries = {}) noexcept
-            : entries_{entries}, name{name}, requirements{requirements}, tries{tries}, formatter{format} {}
+        constexpr discipline(count_type section, count_type activity, formatter formatter, count_type tries, requirements_array const & requirements, std::vector<entry_type> && entries = {}) noexcept
+            : requirements{requirements}, entries_{std::move(entries)}, section{section}, activity{activity}, formatter{formatter}, tries{tries} {}
         constexpr count_type entry_size() const noexcept { return tries + 1; }
         constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + entry_size(), -1); return entries_.data() + size; }
         constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
@@ -90,14 +99,27 @@ namespace dsa {
         constexpr auto end()       noexcept { return entries_.data() + entries_.size(); }
         constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
+    public:
+        requirements_array const requirements;
     private:
         std::vector<entry_type> entries_;
     public:
-        char const * const name; // also filename (should be unique)
-        requirements_array const & requirements;
-        count_type const tries;
+        count_type const section;
+        count_type const activity;
         formatter const formatter;
+        count_type const tries;
     };
+
+    struct participant {
+        std::uint8_t age;
+        bool male;
+    };
+
+    constexpr auto & levels(participant part, requirements_array const & req) {
+        return req[part.male].at(part.male);
+    }
+
+    //constexpr std::unordered_map<entry_type, participant const> map; // id - age, sex
 
 }
 
