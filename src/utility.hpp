@@ -59,21 +59,28 @@ namespace dsa {
     public:
         constexpr explicit io(char const * filename) : filename_{filename} {}
 
-        std::vector<T> load() const noexcept {
+        bool load(std::vector<T> & buffer) const noexcept {
             std::ifstream file{filename_, std::ios_base::binary};
-            if(!file) return {};
+            if(!file) return false;
             std::size_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
-            std::vector<T> vec(size); // list-init precedence requires this to circumvent init-list
-            file.read(reinterpret_cast<char *>(vec.data()), size * sizeof(T));
+            buffer.resize(size);
+            file.read(reinterpret_cast<char *>(buffer.data()), size * sizeof(T));
+            if(!file) buffer.clear();
+            return !file.fail();
+        }
+
+        std::vector<T> load() const noexcept {
+            std::vector<T> vec;
+            load(vec);
             return vec;
         }
 
-        void save(std::span<T const> data) const noexcept {
+        void save(std::span<T const> span) const noexcept { // theoretical specialization for static extent?
             std::ofstream file{filename_, std::ios_base::binary};
-            auto size = data.size();
+            auto size = span.size();
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
-            file.write(reinterpret_cast<char const *>(data.data()), size * sizeof(T));
+            file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for equality
         }
 
     private:
