@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include "discipline.hpp"
@@ -6,7 +7,17 @@ constexpr bool strcmp(char const * s1, char const * s2) noexcept { return std::s
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
 
 inline void io() {
-
+    dsa::io<dsa::entry_type> io{"test.dat"};
+    auto vec = io.load();
+    assert(vec.empty(), "Load");
+    vec.assign({69, 420});
+    io.save(vec);
+    auto v = io.load();
+    assert(io.load() == vec, "Save Vector");
+    vec.resize(vec.size() + 2);
+    io.save(vec);
+    assert(io.load() == vec, "Resave Entry");
+    std::filesystem::remove("test.dat");
 }
 
 constexpr void formatter() {
@@ -88,7 +99,7 @@ int main() {
         formatter();
         discipline();
     } catch(char const * e) {
-        std::cout << e << std::endl;
+        std::cout << "Failed at: " << e << std::endl;
         return -1;
     }
 }
