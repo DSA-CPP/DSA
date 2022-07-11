@@ -1,13 +1,13 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include "dsa.hpp"
+#include "disciplines.hpp"
 
 constexpr bool strcmp(char const * s1, char const * s2) noexcept { return std::string{s1} == s2; }
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
 
 inline void io() {
-    dsa::io<dsa::entry_type> io{"test.dat"};
+    dsa::io<dsa::entry_type, 9> io{"test.dat"};
     auto vec = io.load();
     assert(vec.empty(), "Load");
     vec.assign({69, 420});
@@ -57,32 +57,15 @@ constexpr void formatter() {
     assert(strcmp(buf, "123,4"), "Value to String (SECONDS)");
 }
 
-constexpr void discipline() {
-    dsa::requirements_array req{{
-        {{
-            {{520, 440, 400}},
-            {{510, 425, 345}},
-            {{500, 420, 335}},
-            {{450, 405, 325}},
-            {{2050, 1850, 1650}},
-            {{2020, 1820, 1620}}
-        }},
-        {{
-            {{505, 420, 335}},
-            {{445, 400, 315}},
-            {{420, 340, 300}},
-            {{405, 325, 245}},
-            {{1750, 1550, 1350}},
-            {{1720, 1520, 1320}}
-        }}
-    }};
-    dsa::discipline disc{0, 0, dsa::format::MINUTES, 2, req};
+constexpr void disciplines() {
+    assert(strcmp(dsa::disciplines[2].io.filename, "KraftWerfen.dsadata"), "Filename");
+    dsa::discipline & disc{dsa::disciplines[2].discipline};
     auto e = (disc.add(), disc.add());
     e.id() = 42069;
     e[0] = 500;
-    assert(disc.end() - *disc.begin() == 6 && disc.end() - 3 == e, "Add");
+    assert(disc.end() - *disc.begin() == 8 && disc.end() - 4 == e, "Add");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == static_cast<dsa::entry_type>(-1), "Entry");
-    for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 3;
+    for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 4;
     assert(&dsa::levels({12, true}, disc.requirements) == &disc.requirements[1][1], "Levels");
 }
 
@@ -90,7 +73,7 @@ int main() {
     try {
         io();
         formatter();
-        discipline();
+        disciplines();
     } catch(char const * e) {
         std::cout << "Failed at: " << e << std::endl;
         return -1;
