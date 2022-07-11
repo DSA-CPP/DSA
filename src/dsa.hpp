@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
+#include <ranges>
 #include <unordered_map>
 #include <vector>
 #include "utility.hpp"
@@ -63,27 +64,25 @@ namespace dsa {
         }
 
         constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept {
-            entry_type best;
-            bool (*cmp)(entry_type, entry_type);
+            auto eval = [&](entry_type best, auto cmp) {
+                auto valid = [](entry_type x) { return x != static_cast<entry_type>(-1); };
+                auto better = [&](entry_type x) { return cmp(best, x); };
+                for(auto e : values | std::views::filter(valid) | std::views::filter(better))
+                    best = e;
+                return static_cast<score>(std::ranges::find_if(levels, better) - levels.begin());
+            };
             switch(format_) {
             case format::NONE:
             case format::METERS:
-                best = 0;
-                cmp = [](entry_type a, entry_type b) { return a < b; };
-                break;
+                return eval(0, std::less<entry_type>{});
             case format::MINUTES:
             case format::SECONDS:
-                best = -1;
-                cmp = [](entry_type a, entry_type b) { return a > b; };
-                break;
+                return eval(-1, std::greater<entry_type>{});
             default: // format_ not recognized
                 return score::INVALID;
             }
-            for(auto e : values)
-                if(e != static_cast<entry_type>(-1) && cmp(best, e))
-                    best = e;
-            return static_cast<score>(std::ranges::upper_bound(levels, best, cmp) - levels.begin());
         }
+
     private:
         format format_;
     };

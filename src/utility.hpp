@@ -59,8 +59,6 @@ namespace dsa {
     template<typename T>
     class io {
     public:
-        std::string filename;
-
         bool load(std::vector<T> & buffer) const noexcept {
             std::ifstream file{filename, std::ios_base::binary};
             if(!file) return false;
@@ -84,6 +82,9 @@ namespace dsa {
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
             file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for equality
         }
+
+    public:
+        std::string filename;
     };
 
 }
