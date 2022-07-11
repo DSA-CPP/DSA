@@ -89,8 +89,8 @@ namespace dsa {
 
     class discipline {
     public:
-        constexpr discipline(count_type section, count_type activity, formatter formatter, count_type tries, requirements_array const & requirements, std::vector<entry_type> && entries = {}) noexcept
-            : requirements{requirements}, entries_{std::move(entries)}, section{section}, activity{activity}, formatter{formatter}, tries{tries} {}
+        constexpr discipline(count_type section, count_type activity, formatter formatter, count_type tries, requirements_array const & requirements) noexcept
+            : requirements{requirements}, section{section}, activity{activity}, formatter{formatter}, tries{tries} {}
         constexpr count_type entry_size() const noexcept { return tries + 1; }
         constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + entry_size(), -1); return entries_.data() + size; }
         constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
@@ -98,6 +98,7 @@ namespace dsa {
         constexpr auto end()       noexcept { return entries_.data() + entries_.size(); }
         constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
+        constexpr discipline & operator=(std::vector<entry_type> && entries) noexcept { return entries_ = std::move(entries), *this; }
     public:
         requirements_array const requirements;
     private:
@@ -114,9 +115,7 @@ namespace dsa {
         bool male;
     };
 
-    constexpr auto & levels(participant part, requirements_array const & req) {
-        return req[part.male].at(part.male);
-    }
+    constexpr auto & levels(participant part, requirements_array const & req) { return req[part.male].at(part.male); }
 
     //constexpr std::unordered_map<entry_type, participant const> map; // id - age, sex
 

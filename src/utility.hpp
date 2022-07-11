@@ -59,15 +59,13 @@ namespace dsa {
     template<typename T>
     class io {
     public:
-        bool load(std::vector<T> & buffer) const noexcept {
+        void load(std::vector<T> & buffer) const noexcept {
             std::ifstream file{filename, std::ios_base::binary};
-            if(!file) return false;
             std::size_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
             buffer.resize(size);
             file.read(reinterpret_cast<char *>(buffer.data()), size * sizeof(T));
             if(!file) buffer.clear();
-            return !file.fail();
         }
 
         std::vector<T> load() const noexcept {
