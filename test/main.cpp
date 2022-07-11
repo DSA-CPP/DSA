@@ -25,43 +25,36 @@ constexpr void formatter() {
     dsa::formatter f = format::NONE;
     char buf[20];
     dsa::entry_type values[3] {10, 20, 30};
-    { // all
-        assert(f("1234") == 1234, "String to Value");
-    }
-    { // ascending
-        f = format::NONE;
-        assert(f.eval(values, {10, 20, 30}) == score::GOLD, "Eval 1 (ASC)");
-        assert(f.eval(values, {10, 30, 50}) == score::SILVER, "Eval 2 (ASC)");
-        assert(f.eval(values, {10, 50, 90}) == score::BRONCE, "Eval 3 (ASC)");
-        assert(f.eval(values, {50, 100, 150}) == score::NOTHING, "Eval 4 (ASC)");
-    }
-    { // descending
-        f = format::MINUTES;
-        assert(f.eval(values, {30, 20, 10}) == score::GOLD, "Eval 1 (DESC)");
-        assert(f.eval(values, {15, 10, 5}) == score::SILVER, "Eval 2 (DESC)");
-        assert(f.eval(values, {10, 5, 0}) == score::BRONCE, "Eval 3 (DESC)");
-        assert(f.eval(values, {5, 3, 1}) == score::NOTHING, "Eval 4 (DESC)");
-    }
-    { // NONE
-        f = format::NONE;
-        f(1234, buf);
-        assert(strcmp(buf, "1234"), "Value to String (NONE)");
-    }
-    { // METERS
-        f = format::METERS;
-        f(1234, buf);
-        assert(strcmp(buf, "12,34"), "Value to String (METERS)");
-    }
-    { // MINUTES
-        f = format::MINUTES;
-        f(1234, buf);
-        assert(strcmp(buf, "12:34"), "Value to String (MINUTES)");
-    }
-    { // SECONDS
-        f = format::SECONDS;
-        f(1234, buf);
-        assert(strcmp(buf, "123,4"), "Value to String (SECONDS)");
-    }
+    // all
+    assert(f("1234") == 1234, "String to Value");
+    // ascending
+    f = format::NONE;
+    assert(f.eval(values, {10, 20, 30}) == score::GOLD, "Eval 1 (ASC)");
+    assert(f.eval(values, {10, 30, 50}) == score::SILVER, "Eval 2 (ASC)");
+    assert(f.eval(values, {10, 50, 90}) == score::BRONCE, "Eval 3 (ASC)");
+    assert(f.eval(values, {50, 100, 150}) == score::NOTHING, "Eval 4 (ASC)");
+    // descending
+    f = format::MINUTES;
+    assert(f.eval(values, {30, 20, 10}) == score::GOLD, "Eval 1 (DESC)");
+    assert(f.eval(values, {15, 10, 5}) == score::SILVER, "Eval 2 (DESC)");
+    assert(f.eval(values, {10, 5, 0}) == score::BRONCE, "Eval 3 (DESC)");
+    assert(f.eval(values, {5, 3, 1}) == score::NOTHING, "Eval 4 (DESC)");
+    // NONE
+    f = format::NONE;
+    f(1234, buf);
+    assert(strcmp(buf, "1234"), "Value to String (NONE)");
+    // METERS
+    f = format::METERS;
+    f(1234, buf);
+    assert(strcmp(buf, "12,34"), "Value to String (METERS)");
+    // MINUTES
+    f = format::MINUTES;
+    f(1234, buf);
+    assert(strcmp(buf, "12:34"), "Value to String (MINUTES)");
+    // SECONDS
+    f = format::SECONDS;
+    f(1234, buf);
+    assert(strcmp(buf, "123,4"), "Value to String (SECONDS)");
 }
 
 constexpr void discipline() {
