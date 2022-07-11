@@ -56,11 +56,12 @@ namespace dsa {
         U const stride_;
     };
 
-    template<typename T>
+    template<typename T, std::size_t N>
     class io {
     public:
         void load(std::vector<T> & buffer) const noexcept {
             std::ifstream file{filename, std::ios_base::binary};
+            if(!file) return;
             std::size_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
             buffer.resize(size);
@@ -82,7 +83,7 @@ namespace dsa {
         }
 
     public:
-        std::string filename;
+        char filename[N];
     };
 
 }
