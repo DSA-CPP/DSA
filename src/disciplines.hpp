@@ -5,6 +5,7 @@
 
 #define MAX_REQ {{static_cast<dsa::entry_type>(-1), static_cast<dsa::entry_type>(-1), static_cast<dsa::entry_type>(-1)}}
 #define MIN_REQ {{0, 0, 0}}
+#define POINT_REQ {{1, 2, 3}}
 
 namespace dsa {
 
@@ -24,7 +25,7 @@ namespace dsa {
             auto concat = [&](char const * src) { while(*src) *dest++ = *src++; };
             concat(sections[section]);
             concat(activities[section][activity]);
-            concat(".dsadata");
+            concat(".dsa");
             *dest = 0;
         }
 
@@ -50,6 +51,34 @@ namespace dsa {
         {1, 1, format::METERS, 3, {{
             {{MAX_REQ, MAX_REQ, MAX_REQ, MAX_REQ, {{ 750,  800,  875}}, {{ 750,  800,  875}}}},
             {{MAX_REQ, MAX_REQ, MAX_REQ, MAX_REQ, {{1025, 1100, 1175}}, {{1025, 1125, 1200}}}}
+        }}},
+        {1, 2, format::METERS, 3, {{
+            {{MAX_REQ, {{475, 525, 575}}, {{550, 600, 650}}, {{575, 625, 675}}, {{650, 700, 750}}, {{650, 700, 750}}}},
+            {{MAX_REQ, {{625, 675, 725}}, {{700, 750, 800}}, {{750, 800, 850}}, {{775, 825, 875}}, {{775, 850, 900}}}}
+        }}},
+        {1, 4, format::METERS, 3, {{
+            {{{{130, 145, 165}}, {{140, 160, 180}}, {{155, 170, 190}}, {{165, 180, 200}}, {{165, 185, 205}}, {{160, 180, 200}}}},
+            {{{{150, 170, 185}}, {{170, 190, 205}}, {{190, 205, 225}}, {{205, 220, 240}}, {{210, 230, 250}}, {{210, 230, 250}}}}
+        }}},
+        {1, 5, format::NONE, 3, {{
+            {{POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ}},
+            {{POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ}}
+        }}},
+        {2, 0, format::SECONDS, 1, {{
+            {{{{110, 101, 91}}, {{106, 96, 85}}, {{186, 170, 155}}, {{176, 163, 150}}, {{182, 165, 153}}, {{185, 168, 156}}}},
+            {{{{103,  93, 84}}, {{ 97, 89, 81}}, {{170, 154, 141}}, {{163, 148, 135}}, {{160, 146, 132}}, {{158, 144, 130}}}}
+        }}},
+        {2, 1, format::SECONDS, 1, {{
+            {{{{390, 315, 255}}, {{350, 280, 235}}, {{330, 275, 215}}, {{305, 255, 200}}, {{295, 240, 185}}, {{290, 240, 185}}}},
+            {{{{360, 290, 225}}, {{330, 270, 210}}, {{310, 255, 200}}, {{295, 245, 190}}, {{280, 230, 175}}, {{270, 220, 155}}}}
+        }}},
+        {2, 3, format::NONE, 3, {{
+            {{POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ}},
+            {{POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ, POINT_REQ}}
+        }}},
+        {3, 0, format::METERS, 3, {{
+            {{{{80, 90, 100}}, {{90, 100, 110}}, {{ 95, 105, 115}}, {{105, 115, 125}}, {{110, 120, 130}}, {{110, 120, 130}}}},
+            {{{{85, 95, 105}}, {{95, 105, 115}}, {{110, 120, 130}}, {{120, 130, 140}}, {{130, 140, 150}}, {{135, 145, 155}}}},
         }}}
     };
     //}};
@@ -58,5 +87,6 @@ namespace dsa {
 
 #undef MAX_REQ
 #undef MIN_REQ
+#undef POINT_REQ
 
 #endif

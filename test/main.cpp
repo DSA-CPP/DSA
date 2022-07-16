@@ -58,7 +58,7 @@ constexpr void formatter() {
 }
 
 constexpr void disciplines() {
-    assert(strcmp(dsa::disciplines[2].io.filename, "KraftWerfen.dsadata"), "Filename");
+    assert(strcmp(dsa::disciplines[2].io.filename, "KraftWerfen.dsa"), "Filename");
     dsa::discipline & disc{dsa::disciplines[2].discipline};
     auto e = (disc.add(), disc.add());
     e.id() = 42069;
