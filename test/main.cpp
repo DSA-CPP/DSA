@@ -62,14 +62,14 @@ constexpr void formatter() {
 
 constexpr void disciplines() {
     assert(strcmp(dsa::disciplines[2].io.filename, "KraftWerfen.dsa"), "Filename");
-    dsa::discipline & disc{dsa::disciplines[2].discipline};
+    auto && disc = dsa::disciplines[2].discipline;
     auto e = (disc.add(), disc.add());
     e.id() = 42069;
     e[0] = 500;
     assert(disc.end() - *disc.begin() == 8 && disc.end() - 4 == e, "Add");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == static_cast<dsa::entry_type>(-1), "Entry");
+    assert(e == disc.entry_of(42069), "ID");
     for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 4;
-    assert(&dsa::levels({12, true}, disc.requirements) == &disc.requirements[1][1], "Levels");
 }
 
 int main() {
