@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
+#include <map>
 #include <ranges>
-#include <unordered_map>
 #include <vector>
 #include "utility.hpp"
 
@@ -117,7 +117,7 @@ namespace dsa {
 
     constexpr auto & levels(participant part, requirements_array const & req) { return req[part.male].at(part.male); }
 
-    //constexpr std::unordered_map<entry_type, participant const> map; // id - age, sex
+    inline std::map<entry_type, participant const> participants; // id - age, sex
 
 }
 
