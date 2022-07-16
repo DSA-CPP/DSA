@@ -79,7 +79,7 @@ namespace dsa {
             std::ofstream file{filename, std::ios_base::binary};
             auto size = span.size();
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
-            file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for equality
+            file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for symmetry
         }
 
     public:
