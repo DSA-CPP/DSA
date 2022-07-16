@@ -93,10 +93,12 @@ namespace dsa {
             : requirements{requirements}, section{section}, activity{activity}, formatter{formatter}, tries{tries} {}
         constexpr count_type entry_size() const noexcept { return tries + 1; }
         constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + entry_size(), -1); return entries_.data() + size; }
-        constexpr entry_iterator<entry_type,       count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
+        constexpr entry_iterator<entry_type      , count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
         constexpr entry_iterator<entry_type const, count_type> begin() const noexcept { return {entries_.data(), entry_size()}; }
         constexpr auto end()       noexcept { return entries_.data() + entries_.size(); }
         constexpr auto end() const noexcept { return entries_.data() + entries_.size(); }
+        constexpr entry<entry_type      > entry_of(entry_type id)       noexcept { for(auto && e : *this) if(e.id() == id) return e; return {}; }
+        constexpr entry<entry_type const> entry_of(entry_type id) const noexcept { for(auto && e : *this) if(e.id() == id) return e; return {}; }
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
         constexpr discipline & operator=(std::vector<entry_type> && entries) noexcept { return entries_ = std::move(entries), *this; }
     public:
@@ -110,12 +112,13 @@ namespace dsa {
         count_type const tries;
     };
 
+    // 9 < age < 22
     struct participant {
         std::uint8_t age;
         bool male;
     };
 
-    constexpr auto & levels(participant part, requirements_array const & req) { return req[part.male].at(part.male); }
+    constexpr auto & levels(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
 
     inline std::map<entry_type, participant const> participants; // id - age, sex
 
