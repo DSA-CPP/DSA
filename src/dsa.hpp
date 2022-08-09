@@ -84,7 +84,7 @@ namespace dsa {
         }
 
     private:
-        format format_;
+        dsa::format format_;
     };
 
     class discipline {
@@ -102,14 +102,14 @@ namespace dsa {
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
         constexpr discipline & operator=(std::vector<entry_type> && entries) noexcept { return entries_ = std::move(entries), *this; }
     public:
-        requirements_array const requirements;
+        dsa::requirements_array const requirements;
     private:
         std::vector<entry_type> entries_;
     public:
-        count_type const section;
-        count_type const activity;
-        formatter const formatter;
-        count_type const tries;
+        dsa::count_type const section;
+        dsa::count_type const activity;
+        dsa::formatter const formatter;
+        dsa::count_type const tries;
     };
 
     // 9 < age < 22

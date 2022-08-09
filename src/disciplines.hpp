@@ -30,8 +30,8 @@ namespace dsa {
         }
 
     public:
-        discipline discipline;
-        io<entry_type, 32> io{}; // SchnelligkeitGeraetturnen & KoordinationSchleuderball - 25
+        dsa::discipline discipline;
+        dsa::io<entry_type, 32> io{}; // SchnelligkeitGeraetturnen & KoordinationSchleuderball - 25
     };
 
     inline constinit std::array<manager, 15> disciplines {{
