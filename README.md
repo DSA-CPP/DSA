@@ -6,21 +6,21 @@
 - should pass pedantic, all, extra and conversion
 - `-O3` for releases, `-D _DEBUG` for debugs
 - Dear ImGui with GLFW & OpenGL3
-- compile ***test/main.cpp*** with`-Isrc` under release-settings
+- compile ***test/main.cpp*** with `-Isrc` under release-settings
 
 ## Windows (MinGW-w64)
 
 - ***lib/libgui.a*** containing:
-    - all of ***libglfw3.a***
+    - all of ***libglfw3.a*** (64-bit pre-compiled binaries)
     - compiled ***imgui_\*.cpp***s (Intel amd64 PE/COFF)
 - ***opengl32.dll***
-- ***gdi32.dll***
-- target Windows
+- ***gdi32.dll*** (often linked by default)
+- target = Windows (not necessary, but highly recommended)
 
 ## Linux
 
 - ***lib/libimgui.a*** containing:
     - compiled ***imgui_\*.cpp***s (ELF 64-bit)
 - ***libglfw.so***
-    - use corresponding headers
+    - use package's corresponding headers
 - ***libOpenGL.so***
