@@ -12,7 +12,6 @@ inline void io() {
     assert(vec.empty(), "Load");
     vec.assign({69, 420});
     io.save(vec);
-    auto v = io.load();
     assert(io.load() == vec, "Save Vector");
     vec.resize(vec.size() + 2);
     io.save(vec);
@@ -61,20 +60,33 @@ constexpr void formatter() {
 }
 
 constexpr void disciplines() {
-    assert(strcmp(dsa::disciplines[2].io.filename, "KraftWerfen.dsa"), "Filename");
-    auto && disc = dsa::disciplines[2].discipline;
+    using dsa::entry_type, dsa::disciplines;
+    assert(strcmp(disciplines[2].io.filename, "KraftWerfen.dsa"), "Filename");
+    auto && disc = disciplines[2].discipline;
     auto e = (disc.add(), disc.add());
     e.id() = 42069;
     e[0] = 500;
     assert(disc.end() - *disc.begin() == 8 && disc.end() - 4 == e, "Add");
-    assert(e.id() == 42069 && e[0] == 500 && e[1] == static_cast<dsa::entry_type>(-1), "Entry");
-    assert(e == disc.entry_of(42069), "ID");
-    for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 4;
+    auto e2 = disc.entry_of(42069);
+    assert(e2 == e, "ID");
+    assert(disc.add().id() == static_cast<entry_type>(-1), "Empty Entry");
+    e = disc.entry_of(42069);
+    assert(disc.end() - *disc.begin() == 12 && disc.end() - 8 == e, "Add 2");
+    assert(e.id() == 42069 && e[0] == 500 && e[1] == static_cast<entry_type>(-1), "Entry");
+    for(entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 4;
+    dsa::discipline d{disc};
+    for(d = {}; auto && e : d) assert(e && false, "Assign"); // avoid warning, no cost and also in test
 }
 
 void participants() {
-    assert(dsa::participants == decltype(dsa::participants){}, "Empty");
-    // TODO
+    using dsa::participant, dsa::participants, dsa::age_valid;
+    assert(participants.size() == 0, "Empty");
+    participants.insert({
+        {  69, {16,  true}},
+        { 420, {17,  true}},
+        {1337, {14, false}}
+    }); // non-const test
+    // age_valid & levels_for not testable
 }
 
 int main() {
