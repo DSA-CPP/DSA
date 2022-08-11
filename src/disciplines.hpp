@@ -20,18 +20,17 @@ namespace dsa {
     struct manager {
     public:
         consteval manager(count_type section, count_type activity, formatter format, count_type tries, requirements_array requirements) noexcept
-            : discipline{section, activity, format, tries, requirements} {
+            : discipline{section, activity, format, tries, requirements}, io{} {
             char * dest = io.filename;
-            auto concat = [&](char const * src) { while(*src) *dest++ = *src++; };
-            concat(sections[section]);
-            concat(activities[section][activity]);
-            concat(".dsa");
+            for(auto src : {sections[section], activities[section][activity], ".dsa"})
+                while(*src)
+                    *dest++ = *src++;
             *dest = 0;
         }
 
     public:
         dsa::discipline discipline;
-        dsa::io<entry_type, 32> io{}; // SchnelligkeitGeraetturnen & KoordinationSchleuderball - 25
+        dsa::io<entry_type, 32> io; // SchnelligkeitGeraetturnen & KoordinationSchleuderball - 25
     };
 
     inline constinit std::array<manager, 15> disciplines {{

@@ -118,7 +118,7 @@ namespace dsa {
         bool male;
     };
 
-    constexpr auto & levels(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
+    constexpr auto & levels_for(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
 
     inline std::map<entry_type, participant const> participants; // id - age, sex
 
