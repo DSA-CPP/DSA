@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <ranges>
 #include <vector>
 #include "utility.hpp"
@@ -100,7 +100,8 @@ namespace dsa {
         constexpr entry<entry_type      > entry_of(entry_type id)       noexcept { for(auto && e : *this) if(e.id() == id) return e; return {}; }
         constexpr entry<entry_type const> entry_of(entry_type id) const noexcept { for(auto && e : *this) if(e.id() == id) return e; return {}; }
         constexpr operator std::vector<entry_type> const &() const noexcept { return entries_; }
-        constexpr discipline & operator=(std::vector<entry_type> && entries) noexcept { return entries_ = std::move(entries), *this; }
+        constexpr discipline & operator=(std::vector<entry_type> const & entries) noexcept { return entries_ =           entries , *this; }
+        constexpr discipline & operator=(std::vector<entry_type>      && entries) noexcept { return entries_ = std::move(entries), *this; }
     public:
         dsa::requirements_array const requirements;
     private:
@@ -112,15 +113,15 @@ namespace dsa {
         dsa::count_type const tries;
     };
 
-    // 9 < age < 22
     struct participant {
         std::uint8_t age;
         bool male;
     };
 
+    constexpr bool age_valid(decltype(participant::age) age) noexcept { return 9 < age && age < 22; }
     constexpr auto & levels_for(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
 
-    inline std::map<entry_type, participant const> participants; // id - age, sex
+    inline std::unordered_map<entry_type, participant const> participants; // id - age, sex
 
 }
 
