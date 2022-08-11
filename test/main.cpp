@@ -72,11 +72,17 @@ constexpr void disciplines() {
     for(dsa::entry_type * ptr{*disc.begin()}; auto && entry : disc) assert(ptr == entry, "Iterator"), ptr += 4;
 }
 
+void participants() {
+    assert(dsa::participants == decltype(dsa::participants){}, "Empty");
+    // TODO
+}
+
 int main() {
     try {
         io();
         formatter();
         disciplines();
+        participants();
     } catch(char const * e) {
         std::cout << "Failed at: " << e << std::endl;
         return -1;
