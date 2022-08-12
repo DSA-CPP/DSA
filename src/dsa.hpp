@@ -35,7 +35,7 @@ namespace dsa {
     class formatter {
     public:
         constexpr formatter(format format) noexcept : format_{format} {}
-        constexpr entry_type operator()(char const * string) const noexcept { return value<entry_type>(string).value_or(-1); }
+        constexpr auto operator()(char const * string) const noexcept { return value<entry_type>(string).value_or(-1); }
 
         constexpr void operator()(entry_type value, char * buffer) const noexcept {
             if(value != static_cast<entry_type>(-1)) {
@@ -63,7 +63,7 @@ namespace dsa {
             *buffer = 0;
         }
 
-        constexpr score eval(std::span<entry_type const> values, level_array const & levels) const noexcept {
+        constexpr auto operator()(std::span<entry_type const> values, level_array const & levels) const noexcept {
             auto eval = [&](entry_type best, auto cmp) {
                 auto valid = [](entry_type x) { return x != static_cast<entry_type>(-1); };
                 auto better = [&](entry_type x) { return cmp(best, x); };
@@ -90,7 +90,7 @@ namespace dsa {
     class discipline {
     public:
         constexpr discipline(count_type section, count_type activity, formatter formatter, count_type tries, requirements_array const & requirements) noexcept
-            : requirements{requirements}, section{section}, activity{activity}, formatter{formatter}, tries{tries} {}
+            : requirements{requirements}, section{section}, activity{activity}, format{formatter}, tries{tries} {}
         constexpr count_type entry_size() const noexcept { return tries + 1; }
         constexpr entry<entry_type> add() noexcept { auto size = entries_.size(); entries_.resize(size + entry_size(), -1); return entries_.data() + size; }
         constexpr entry_iterator<entry_type      , count_type> begin()       noexcept { return {entries_.data(), entry_size()}; }
@@ -109,7 +109,7 @@ namespace dsa {
     public:
         dsa::count_type const section;
         dsa::count_type const activity;
-        dsa::formatter const formatter;
+        dsa::formatter const format; // effectively a set of non-static member functions
         dsa::count_type const tries;
     };
 

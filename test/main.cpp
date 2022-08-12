@@ -29,18 +29,18 @@ constexpr void formatter() {
     assert(f("1234") == 1234, "String to Value");
     // ascending
     f = format::NONE;
-    assert(f.eval(values, {10, 20, 30}) == score::GOLD, "Eval 1 (ASC)");
-    assert(f.eval(values, {10, 30, 50}) == score::SILVER, "Eval 2 (ASC)");
-    assert(f.eval(values, {10, 50, 90}) == score::BRONCE, "Eval 3 (ASC)");
-    assert(f.eval(values, {50, 100, 150}) == score::NOTHING, "Eval 4 (ASC)");
-    assert(f.eval(invalids, {0, 10, 20}) == score::SILVER, "Eval 5 (ASC)");
+    assert(f(values, {10, 20, 30}) == score::GOLD, "Eval 1 (ASC)");
+    assert(f(values, {10, 30, 50}) == score::SILVER, "Eval 2 (ASC)");
+    assert(f(values, {10, 50, 90}) == score::BRONCE, "Eval 3 (ASC)");
+    assert(f(values, {50, 100, 150}) == score::NOTHING, "Eval 4 (ASC)");
+    assert(f(invalids, {0, 10, 20}) == score::SILVER, "Eval 5 (ASC)");
     // descending
     f = format::MINUTES;
-    assert(f.eval(values, {30, 20, 10}) == score::GOLD, "Eval 1 (DESC)");
-    assert(f.eval(values, {15, 10, 5}) == score::SILVER, "Eval 2 (DESC)");
-    assert(f.eval(values, {10, 5, 0}) == score::BRONCE, "Eval 3 (DESC)");
-    assert(f.eval(values, {5, 3, 1}) == score::NOTHING, "Eval 4 (DESC)");
-    assert(f.eval(invalids, {20, 10, 0}) == score::SILVER, "Eval 5 (DESC)");
+    assert(f(values, {30, 20, 10}) == score::GOLD, "Eval 1 (DESC)");
+    assert(f(values, {15, 10, 5}) == score::SILVER, "Eval 2 (DESC)");
+    assert(f(values, {10, 5, 0}) == score::BRONCE, "Eval 3 (DESC)");
+    assert(f(values, {5, 3, 1}) == score::NOTHING, "Eval 4 (DESC)");
+    assert(f(invalids, {20, 10, 0}) == score::SILVER, "Eval 5 (DESC)");
     // NONE
     f = format::NONE;
     f(1234, buf);
