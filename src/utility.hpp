@@ -59,8 +59,8 @@ namespace dsa {
     struct entry_range {
         entry_iterator<T, U> begin_;
         T * end_;
-        constexpr auto begin() const noexcept { return begin; }
-        constexpr auto   end() const noexcept { return end; }
+        constexpr auto begin() const noexcept { return begin_; }
+        constexpr auto   end() const noexcept { return end_; }
     };
 
     template<typename T>

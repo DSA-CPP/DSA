@@ -102,7 +102,6 @@ namespace dsa {
         dsa::count_type activity;
         dsa::formatter format; // effectively a set of non-static member functions
         dsa::count_type tries;
-        // 4 byte buffer
         dsa::requirements_array requirements;
         static constexpr char const * sections[4]{"Ausdauer", "Kraft", "Schnelligkeit", "Koordination"};
         static constexpr char const * activities[4][7]{
