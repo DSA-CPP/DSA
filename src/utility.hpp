@@ -55,7 +55,15 @@ namespace dsa {
         U const stride_;
     };
 
-    template<typename T, std::size_t N>
+    template<typename T, std::integral U>
+    struct entry_range {
+        entry_iterator<T, U> begin_;
+        T * end_;
+        constexpr auto begin() const noexcept { return begin; }
+        constexpr auto   end() const noexcept { return end; }
+    };
+
+    template<typename T>
     class io {
     public:
         void load(std::vector<T> & buffer) const noexcept {
@@ -83,7 +91,7 @@ namespace dsa {
         }
 
     public:
-        char filename[N];
+        std::string filename;
     };
 
 }

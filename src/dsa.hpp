@@ -114,12 +114,7 @@ namespace dsa {
 
     };
 
-    constexpr std::string filename(discipline const & disc) noexcept {
-        std::string path;
-        for(auto src : {disc.sections[disc.section], disc.activities[disc.section][disc.activity], ".dsa"})
-            path.append(src);
-        return path;
-    }
+    constexpr std::string name(discipline const & disc) noexcept { return std::string{disc.sections[disc.section]} + disc.activities[disc.section][disc.activity]; }
 
     inline constinit std::array<dsa::discipline, 15> const disciplines{{
         {0, 0, format::MINUTES, 1, {
