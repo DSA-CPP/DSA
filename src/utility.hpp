@@ -1,6 +1,7 @@
 #ifndef _DSA_UTILITY_HPP_
 #define _DSA_UTILITY_HPP_
 
+#include <bit>
 #include <concepts>
 #include <fstream>
 #include <optional>
@@ -9,6 +10,17 @@
 #include <vector>
 
 namespace dsa {
+
+    template<typename T>
+    constexpr T endian_on_se(T const & val) noexcept {
+        if constexpr(std::endian::native == std::endian::big)
+            return val;
+        T n;
+        auto max_shift = 8 * sizeof(T);
+        for(std::size_t shift{}; shift != max_shift; shift +=8)
+            n |= (val >> (max_shift - 8 - shift) & 0xFF) << shift;
+        return n;
+    }
 
     template<std::unsigned_integral T>
     constexpr std::optional<T> value(char const * string) noexcept {
@@ -52,7 +64,7 @@ namespace dsa {
         constexpr entry<T> operator*() const noexcept { return ptr_; }
     private:
         T * ptr_;
-        U const stride_;
+        U stride_;
     };
 
     template<typename T, std::integral U>
@@ -70,7 +82,7 @@ namespace dsa {
             buffer.clear();
             std::ifstream file{filename, std::ios_base::binary};
             if(!file) return;
-            std::uint32_t size;
+            std::size_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
             buffer.resize(size);
             file.read(reinterpret_cast<char *>(buffer.data()), size * sizeof(T));
@@ -85,7 +97,7 @@ namespace dsa {
 
         void save(std::span<T const> span) const noexcept { // theoretical specialization for static extent?
             std::ofstream file{filename, std::ios_base::binary};
-            std::uint32_t size{span.size()};
+            auto size = span.size();
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
             file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for symmetry
         }
