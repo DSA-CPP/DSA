@@ -3,11 +3,9 @@
 
 #include <concepts>
 #include <fstream>
-#include <iterator>
 #include <optional>
 #include <span>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace dsa {
@@ -61,9 +59,10 @@ namespace dsa {
     class io {
     public:
         void load(std::vector<T> & buffer) const noexcept {
+            buffer.clear();
             std::ifstream file{filename, std::ios_base::binary};
             if(!file) return;
-            std::size_t size;
+            std::uint32_t size;
             file.read(reinterpret_cast<char *>(&size), sizeof(size));
             buffer.resize(size);
             file.read(reinterpret_cast<char *>(buffer.data()), size * sizeof(T));
@@ -78,7 +77,7 @@ namespace dsa {
 
         void save(std::span<T const> span) const noexcept { // theoretical specialization for static extent?
             std::ofstream file{filename, std::ios_base::binary};
-            auto size = span.size();
+            std::uint32_t size{span.size()};
             file.write(reinterpret_cast<char const *>(&size), sizeof(size));
             file.write(reinterpret_cast<char const *>(span.data()), size * sizeof(T)); // not size_bytes() for symmetry
         }
