@@ -8,7 +8,8 @@ namespace dsa::client {
 
     class context {
     public:
-        context(std::string && name) noexcept : sname_{std::move(name)} {} // todo: load participants hence no constexpr
+        template<typename T>
+        context(T && name) noexcept : sname_{std::forward<T>(name)} {} // todo: load participants hence no constexpr
         ~context() { save(); } // todo: save participants
         constexpr auto current() const noexcept { return disc_; }
         constexpr auto & name() const noexcept { return sname_; }
@@ -23,10 +24,10 @@ namespace dsa::client {
         }
 
         void save() const noexcept { if(disc_) io_.save(entries_); }
-        void load(discipline const * disc) noexcept {
+        void load(discipline const & disc) noexcept {
             save();
-            disc_ = disc;
-            io_.filename = sname_ + '/' + dsa::name(*disc) + ".dsa";
+            disc_ = &disc;
+            io_.filename = sname_ + '/' + dsa::name(disc) + ".dsa";
             io_.load(entries_);
         }
 

@@ -115,7 +115,7 @@ namespace dsa {
 
     constexpr std::string name(discipline const & disc) noexcept { return std::string{disc.sections[disc.section]} + disc.activities[disc.section][disc.activity]; }
 
-    inline constinit std::array<dsa::discipline, 15> const disciplines{{
+    inline constexpr std::array<dsa::discipline, 15> disciplines{{
         {0, 0, format::MINUTES, 1, {
             {{{520, 440, 400}}, {{510, 425, 345}}, {{500, 420, 335}}, {{450, 405, 325}}, {{2050, 1850, 1650}}, {{2020, 1820, 1620}}},
             {{{505, 420, 335}}, {{445, 400, 315}}, {{420, 340, 300}}, {{405, 325, 245}}, {{1750, 1550, 1350}}, {{1720, 1520, 1320}}}
