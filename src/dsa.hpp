@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <array>
 #include <ranges>
 #include "utility.hpp"
 
@@ -97,33 +98,30 @@ namespace dsa {
     constexpr auto & levels_for(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
 
     struct discipline {
-    public:
-        dsa::count_type const section;
-        dsa::count_type const activity;
-        dsa::formatter const format; // effectively a set of non-static member functions
-        dsa::count_type const tries;
-        // 4 bytes padding
-        dsa::requirements_array const requirements;
-    private:
-        static inline constexpr char const * sections[4]{"Ausdauer", "Kraft", "Schnelligkeit", "Koordination"};
-        static inline constexpr char const * activities[4][7]{
+        dsa::count_type section;
+        dsa::count_type activity;
+        dsa::formatter format; // effectively a set of non-static member functions
+        dsa::count_type tries;
+        // 4 byte buffer
+        dsa::requirements_array requirements;
+        static constexpr char const * sections[4]{"Ausdauer", "Kraft", "Schnelligkeit", "Koordination"};
+        static constexpr char const * activities[4][7]{
             {"Laufen", 0, 0, 0, "Schwimmen"},
             {"Werfen", "Medizinball", "Kugelstoßen", 0, "Standweitsprung", "Geraetturnen"},
             {"Laufen", "Schwimmen", 0, "Geraetturnen"},
             {"Hochsprung", "Weitsprung", 0, 0, "Schleuderball", "Seilspringen", "Geraetturnen"}
         };
 
-    public:
-        static constexpr void filename(count_type section, count_type activity, char * dest) noexcept {
-            for(auto src : {sections[section], activities[section][activity], ".dsa"})
-                while(*src)
-                    *dest++ = *src++;
-            *dest = 0;
-        }
-
     };
 
-    inline constinit std::array<dsa::discipline, 15> disciplines{{
+    constexpr std::string filename(discipline const & disc) noexcept {
+        std::string path;
+        for(auto src : {disc.sections[disc.section], disc.activities[disc.section][disc.activity], ".dsa"})
+            path.append(src);
+        return path;
+    }
+
+    inline constinit std::array<dsa::discipline, 15> const disciplines{{
         {0, 0, format::MINUTES, 1, {
             {{{520, 440, 400}}, {{510, 425, 345}}, {{500, 420, 335}}, {{450, 405, 325}}, {{2050, 1850, 1650}}, {{2020, 1820, 1620}}},
             {{{505, 420, 335}}, {{445, 400, 315}}, {{420, 340, 300}}, {{405, 325, 245}}, {{1750, 1550, 1350}}, {{1720, 1520, 1320}}}
