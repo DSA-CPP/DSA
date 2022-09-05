@@ -11,17 +11,6 @@
 
 namespace dsa {
 
-    template<typename T>
-    constexpr T endian_on_se(T const & val) noexcept {
-        if constexpr(std::endian::native == std::endian::big)
-            return val;
-        T n;
-        auto max_shift = 8 * sizeof(T);
-        for(std::size_t shift{}; shift != max_shift; shift +=8)
-            n |= (val >> (max_shift - 8 - shift) & 0xFF) << shift;
-        return n;
-    }
-
     template<std::unsigned_integral T>
     constexpr std::optional<T> value(char const * string) noexcept {
         T accumulate{};

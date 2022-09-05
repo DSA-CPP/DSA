@@ -18,6 +18,9 @@ namespace dsa {
     using level_array = std::array<entry_type, 3>; // bronce, silver, gold
     using requirements_array = level_array[2][6]; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-21 | male, female
 
+    inline constexpr std::uint16_t port = 50'000;
+    inline constexpr char const * service = "50000";
+
     enum class score : count_type {
         NOTHING,
         BRONCE,
