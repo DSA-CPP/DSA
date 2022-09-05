@@ -5,10 +5,14 @@
 - C++ 20
 - should pass pedantic, all, extra and conversion
 - `-O3` for releases, `-D _DEBUG` for debugs
-- Dear ImGui with GLFW & OpenGL3
 - compile ***test/main.cpp*** with `-Isrc` under release-settings
 
-## Windows (MinGW-w64)
+## Client
+
+- Dear ImGui with GLFW & OpenGL3
+- NETpp (aka. net++)
+
+### Windows (MinGW-w64)
 
 - ***lib/libgui.a*** containing:
     - all of ***libglfw3.a*** (64-bit pre-compiled binaries)
@@ -17,10 +21,15 @@
 - ***gdi32.dll*** (often linked by default)
 - target = Windows (not necessary, but highly recommended)
 
-## Linux
+### Linux
 
 - ***lib/libimgui.a*** containing:
     - compiled ***imgui_\*.cpp***s (ELF 64-bit)
 - ***libglfw.so***
     - use package's corresponding headers
 - ***libOpenGL.so***
+
+## Server
+
+*todo*
+
