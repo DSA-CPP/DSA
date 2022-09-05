@@ -1,7 +1,12 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#ifdef _CLIENT
 #include "client.hpp"
+#endif
+#ifdef _SERVER
+#include "server.hpp"
+#endif
 
 constexpr bool strcmp(char const * s1, char const * s2) noexcept { return std::string_view{s1} == s2; }
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
@@ -72,7 +77,7 @@ constexpr void participants() {
 }
 
 static void context() {
-#ifdef _DSA_CLIENT_HPP_
+#ifdef _CLIENT
     using dsa::disciplines;
     auto invalid = static_cast<dsa::entry_type>(-1);
     dsa::client::context ctx{"Test-Station"};
@@ -96,6 +101,9 @@ static void context() {
     assert(r.end() - *r.begin() == 12 && r.end() - 8 == e, "Add 2");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == invalid && e[2] == invalid, "Entry");
     // todo: test participants
+#endif
+#ifdef _SERVER
+
 #endif
 }
 
