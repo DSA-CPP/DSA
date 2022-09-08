@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <iostream>
-#include <string>
+#include <string_view>
+#include "dsa.hpp"
 #ifdef _CLIENT
 #include "client.hpp"
 #endif
@@ -8,7 +9,7 @@
 #include "server.hpp"
 #endif
 
-constexpr bool strcmp(char const * s1, char const * s2) noexcept { return std::string_view{s1} == s2; }
+constexpr bool scmp(char const * s1, char const * s2) noexcept { return std::string_view{s1} == s2; }
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
 
 inline void io() {
@@ -50,19 +51,19 @@ constexpr void formatter() {
     // NONE
     f = format::NONE;
     assert(f("1234") == 1234, "String to Value (NONE)");
-    assert(strcmp((f(1234, buf), buf), "1234"), "Value to String (NONE)");
+    assert(scmp((f(1234, buf), buf), "1234"), "Value to String (NONE)");
     // METERS
     f = format::METERS;
     assert(f("12,34m") == 1234, "String to Value (METERS)");
-    assert(strcmp((f(1234, buf), buf), "12,34"), "Value to String (METERS)");
+    assert(scmp((f(1234, buf), buf), "12,34"), "Value to String (METERS)");
     // MINUTES
     f = format::MINUTES;
     assert(f("12:34 min") == 1234, "String to Value (MINUTES)");
-    assert(strcmp((f(1234, buf), buf), "12:34"), "Value to String (MINUTES)");
+    assert(scmp((f(1234, buf), buf), "12:34"), "Value to String (MINUTES)");
     // SECONDS
     f = format::SECONDS;
     assert(f("123.4s") == 1234, "String to Value (SECONDS)");
-    assert(strcmp((f(1234, buf), buf), "123,4"), "Value to String (SECONDS)");
+    assert(scmp((f(1234, buf), buf), "123,4"), "Value to String (SECONDS)");
 }
 
 constexpr void disciplines() {
@@ -80,7 +81,7 @@ static void context() {
 #ifdef _CLIENT
     using dsa::disciplines;
     auto invalid = static_cast<dsa::entry_type>(-1);
-    dsa::client::context ctx{"Test-Station"};
+    dsa::client::context ctx{"Test-Station", "localhost"};
     assert(ctx.name() == "Test-Station", "New Context");
     assert(!ctx.current(), "Empty Context");
     auto && disc = disciplines[2];
