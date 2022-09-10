@@ -9,12 +9,12 @@ namespace dsa::client {
 
     class context {
     public:
-        template<typename T, typename U>
-        context(T && name, U && server) noexcept
-            : station_name_{std::forward<T>(name)}, server_name_{std::forward<U>(server)} {} // todo: load participants hence no constexpr
+        template<typename T>
+        constexpr context(T && name) noexcept : station_name_{std::forward<T>(name)} {}
         ~context() { save(); } // todo: save participants
         constexpr auto current() const noexcept { return disc_; }
         constexpr auto & name() const noexcept { return station_name_; }
+        constexpr auto & participants() const noexcept { return parts_; }
         constexpr entry_range<entry_type      , int> entries()       noexcept { return {{entries_.data(), disc_->tries + 1}, entries_.end().base()}; }
         constexpr entry_range<entry_type const, int> entries() const noexcept { return {{entries_.data(), disc_->tries + 1}, entries_.end().base()}; }
         constexpr entry<entry_type      > entry_of(entry_type id)       noexcept { for(auto && e : entries()) if(e.id() == id) return e; return {}; }
@@ -33,11 +33,21 @@ namespace dsa::client {
             io_.load(entries_);
         }
 
+        void load_participants(net::tcp::connection const & conn) noexcept {
+            parts_.clear();
+            std::pair<entry_type, participant> buf;
+            auto ptr = reinterpret_cast<char *>(&buf);
+            try {
+                while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf))
+                    parts_.insert(buf);
+            } catch(std::exception &) {}
+        }
+
     private:
         std::unordered_map<entry_type, participant> parts_; // id - age, sex
         std::vector<entry_type> entries_;
         dsa::io<entry_type> io_;
-        std::string station_name_, server_name_;
+        std::string station_name_;
         dsa::discipline const * disc_{};
     };
 
