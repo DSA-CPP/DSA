@@ -5,7 +5,7 @@
 - C++ 20
 - should pass pedantic, all, extra and conversion
 - `-O3` for releases, `-D _DEBUG` for debugs
-- compile ***test/main.cpp*** with `-Isrc` under release-settings
+- compile ***test/main.cpp*** with `-Isrc [-D _CLIENT] [-D _SERVER]` under release-settings
 
 ## Client
 
@@ -32,4 +32,3 @@
 ## Server
 
 *todo*
-
