@@ -3,6 +3,7 @@
 #include <string_view>
 #include "dsa.hpp"
 #ifdef _CLIENT
+#include <thread>
 #include "client.hpp"
 #endif
 #ifdef _SERVER
@@ -81,7 +82,7 @@ static void context() {
 #ifdef _CLIENT
     using dsa::disciplines;
     auto invalid = static_cast<dsa::entry_type>(-1);
-    dsa::client::context ctx{"Test-Station", "localhost"};
+    dsa::client::context ctx{"Test-Station"};
     assert(ctx.name() == "Test-Station", "New Context");
     assert(!ctx.current(), "Empty Context");
     auto && disc = disciplines[2];
@@ -102,9 +103,24 @@ static void context() {
     assert(r.end() - *r.begin() == 12 && r.end() - 8 == e, "Add 2");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == invalid && e[2] == invalid, "Entry");
     // todo: test participants
+    auto ep = net::endpoint(0, 54321);
+    std::pair<dsa::entry_type, dsa::participant> vals[]{
+        {0, {17, false}},
+        {1, {16, true}}
+    };
+    std::jthread s_t{[&]() {
+        net::tcp::server serv{ep, 1};
+        net::tcp::connection conn{serv};
+        conn.sendall({reinterpret_cast<char *>(vals), sizeof(vals)});
+    }};
+    ctx.load_participants({ep});
+    assert(ctx.participants().size() == 2, "Load all");
+    for(auto && [id, part] : vals) {
+        auto && p = ctx.participants().at(id);
+        assert(p.age == part.age && p.male == part.male, "Load correctly");
+    }
 #endif
 #ifdef _SERVER
-
 #endif
 }
 
