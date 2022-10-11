@@ -1,6 +1,7 @@
 #ifndef _DSA_CLIENT_HPP_
 #define _DSA_CLIENT_HPP_
 
+#include <filesystem>
 #include <unordered_map>
 #include "NETpp/tcp.hpp"
 #include "dsa.hpp"
@@ -10,7 +11,10 @@ namespace dsa::client {
     class context {
     public:
         template<typename T>
-        constexpr context(T && name) noexcept : station_name_{std::forward<T>(name)} {}
+        context(T && name) noexcept : station_name_{std::forward<T>(name)} {
+            std::filesystem::create_directory(station_name_);
+        }
+
         ~context() { if(disc_) save(); } // todo: save participants
         constexpr auto current() const noexcept { return disc_; }
         constexpr auto & name() const noexcept { return station_name_; }
@@ -38,10 +42,8 @@ namespace dsa::client {
             parts_.clear();
             std::pair<entry_type, participant> buf;
             auto ptr = reinterpret_cast<char *>(&buf);
-            try {
-                while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf))
-                    parts_.insert(buf);
-            } catch(std::exception &) {}
+            while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf))
+                parts_.insert(buf);
         }
 
     private:
