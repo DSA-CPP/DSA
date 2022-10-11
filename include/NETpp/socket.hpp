@@ -120,10 +120,10 @@ namespace net {
         if constexpr(std::endian::native == std::endian::big)
             return val;
         auto max_shift = 8 * sizeof(T) - 8;
-        auto n = static_cast<T>(val >> max_shift & 0xFF);
+        auto n = val >> max_shift & 0xFF;
         for(std::size_t shift{8}; shift <= max_shift; shift += 8)
             n |= (val >> (max_shift - shift) & 0xFF) << shift;
-        return n;
+        return static_cast<T>(n);
     }
 
     constexpr sockaddr_in endpoint(std::uint32_t ip_addr, std::uint16_t port) noexcept {
@@ -199,7 +199,7 @@ namespace net {
         void reset(socket_address addr) { addr_size_ = addr.copy_to(addr_); }
         void resock(socket_properies prop = {}) { if((sock_ = ::socket(addr_.ss_family, prop.socktype, prop.protocol)) == context::invalid()) throw context::error("accept"); }
         socket(socket_address addr, socket_properies prop = {}) { reset(addr); resock(prop); }
-        ~socket() { try { close(); } catch(std::exception &) {} }
+        ~socket() try { close(); } catch(std::exception &) {}
         constexpr auto family() const noexcept { return addr_.ss_family; }
         constexpr operator socket_address() const noexcept { return {&addr_, addr_size_}; }
         void shutdown(int how = 2) { if(::shutdown(sock_, how)) throw context::error("shutdown"); }
