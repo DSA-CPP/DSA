@@ -1,14 +1,9 @@
-#include <filesystem>
 #include <iostream>
 #include <string_view>
 #include "dsa.hpp"
-#ifdef _CLIENT
 #include <thread>
 #include "client.hpp"
-#endif
-#ifdef _SERVER
 #include "server.hpp"
-#endif
 
 constexpr bool scmp(char const * s1, char const * s2) noexcept { return std::string_view{s1} == s2; }
 constexpr void assert(bool pred, char const * error_message) { if(!pred) throw error_message; }
@@ -78,8 +73,7 @@ constexpr void participants() {
         assert(!dsa::participant::valid_age(i), "Invalid Age");
 }
 
-static void context() {
-#ifdef _CLIENT
+static void client() {
     using dsa::disciplines;
     auto invalid = static_cast<dsa::entry_type>(-1);
     dsa::client::context ctx{"Test-Station"};
@@ -88,6 +82,7 @@ static void context() {
     auto && disc = disciplines[2];
     static_assert(dsa::name(disc) == "KraftWerfen");
     ctx.load(disc);
+    assert(ctx.current(), "Non-Empty Context");
     auto r = ctx.entries();
     assert(*r.begin() == r.end(), "Empty Entries");
     auto e = (ctx.add(), ctx.add());
@@ -102,28 +97,29 @@ static void context() {
     r = ctx.entries();
     assert(r.end() - *r.begin() == 12 && r.end() - 8 == e, "Add 2");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == invalid && e[2] == invalid, "Entry");
-    // todo: test participants
+}
+
+static void network() {
+    NET_INIT();
     auto ep = net::endpoint(0, 54321);
     std::pair<dsa::entry_type, dsa::participant> vals[]{
         {0, {17, false}},
         {1, {16, true}}
     };
-    NET_INIT();
     std::jthread s_t{[&]() {
-        net::tcp::server serv{ep, 1};
-        net::tcp::connection conn{serv};
-        conn.sendall({reinterpret_cast<char *>(vals), sizeof(vals)});
+        dsa::server::context ctx;
+        for(auto && [id, info] : vals)
+            ctx.emplace(id, info, {});
+        ctx.send_participants(net::tcp::server{ep, 1});
     }};
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    dsa::client::context ctx{"Station"};
     ctx.load_participants({ep});
     assert(ctx.participants().size() == 2, "Load all");
     for(auto && [id, part] : vals) {
         auto && p = ctx.participants().at(id);
         assert(p.age == part.age && p.male == part.male, "Load correctly");
     }
-#endif
-#ifdef _SERVER
-#endif
 }
 
 int main() {
@@ -132,7 +128,8 @@ int main() {
         formatter();
         disciplines();
         participants();
-        context();
+        client();
+        network();
     } catch(char const * e) {
         std::cout << "Failed at: " << e << std::endl;
         return -1;
