@@ -12,7 +12,7 @@ namespace dsa::client {
     public:
         template<typename T>
         context(T && name) noexcept : station_name_{std::forward<T>(name)} {
-            std::filesystem::create_directory(station_name_);
+            std::filesystem::create_directory(station_name_); // might throw
         }
 
         ~context() { if(disc_) save(); } // todo: save participants
@@ -42,8 +42,10 @@ namespace dsa::client {
             parts_.clear();
             std::pair<entry_type, participant> buf;
             auto ptr = reinterpret_cast<char *>(&buf);
-            while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf))
+            while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf)) {
+                buf.first = net::endian(buf.first);
                 parts_.insert(buf);
+            }
         }
 
     private:
