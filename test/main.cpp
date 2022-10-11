@@ -108,11 +108,13 @@ static void context() {
         {0, {17, false}},
         {1, {16, true}}
     };
+    NET_INIT();
     std::jthread s_t{[&]() {
         net::tcp::server serv{ep, 1};
         net::tcp::connection conn{serv};
         conn.sendall({reinterpret_cast<char *>(vals), sizeof(vals)});
     }};
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     ctx.load_participants({ep});
     assert(ctx.participants().size() == 2, "Load all");
     for(auto && [id, part] : vals) {
