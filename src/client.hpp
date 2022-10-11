@@ -11,7 +11,7 @@ namespace dsa::client {
     public:
         template<typename T>
         constexpr context(T && name) noexcept : station_name_{std::forward<T>(name)} {}
-        ~context() { save(); } // todo: save participants
+        ~context() { if(disc_) save(); } // todo: save participants
         constexpr auto current() const noexcept { return disc_; }
         constexpr auto & name() const noexcept { return station_name_; }
         constexpr auto & participants() const noexcept { return parts_; }
@@ -25,9 +25,10 @@ namespace dsa::client {
             return entries_.data() + size;
         }
 
-        void save() const noexcept { if(disc_) io_.save(entries_); }
+        void save() const noexcept { io_.save(entries_); }
         void load(discipline const & disc) noexcept {
-            save();
+            if(disc_)
+                save();
             disc_ = &disc;
             io_.filename = station_name_ + '/' + dsa::name(disc) + ".dsa";
             io_.load(entries_);
