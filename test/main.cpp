@@ -99,6 +99,7 @@ static void server() {
     fs::create_directory("testing");
     std::fstream{"testing/test.txt"};
     fs::current_path("testing");
+    file(dsa::discipline_id{9, 9}).save({});
     file(disc.id()).save({});
     auto files = all_files();
     assert(files.size() == 1 &&

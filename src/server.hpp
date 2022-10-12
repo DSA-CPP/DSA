@@ -48,6 +48,7 @@ namespace dsa::server {
             '.', 'd', 's', 'a'}}; // fuck u optimizer
     }
 
+    // only valid names of known disciplines
     inline std::vector<std::pair<discipline_id, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
         std::vector<std::pair<discipline_id, io<entry_type>>> res;
         for(auto && f : std::filesystem::directory_iterator{dir}) {
@@ -57,6 +58,8 @@ namespace dsa::server {
             if(path.length() != 6 || !path.ends_with(".dsa"))
                 continue;
             discipline_id id{static_cast<count_type>(path[0] - '0'), static_cast<count_type>(path[1] - '0')};
+            if(!get_discipline(id))
+                continue;
             res.emplace_back(id, path);
         }
         return res;
