@@ -60,6 +60,9 @@ namespace dsa {
     class entry_range {
     public:
         constexpr entry_range(entry_iterator<T, U> begin, T * end) noexcept : begin_{begin}, end_{end} {}
+        constexpr entry_range(std::span<T> span, U stride) noexcept
+        : entry_range{{span.data(), stride}, span.data() + span.size()} {}
+
         constexpr auto begin() const noexcept { return begin_; }
         constexpr auto   end() const noexcept { return end_; }
     private:
@@ -68,7 +71,7 @@ namespace dsa {
     };
 
     template<typename T, typename U>
-    constexpr entry<T> entry_of(entry_range<T, U> range, auto && id) noexcept {
+    constexpr entry<T> find_entry(entry_range<T, U> range, auto && id) noexcept {
         for(auto e : range)
             if(e.id() == id)
                 return e;

@@ -18,8 +18,8 @@ namespace dsa::client {
         constexpr auto current() const noexcept { return disc_; }
         constexpr auto & name() const noexcept { return station_name_; }
         constexpr auto & participants() const noexcept { return parts_; }
-        constexpr entry_range<entry_type      , int> entries()       noexcept { return {{entries_.data(), disc_->tries + 1}, entries_.end().base()}; }
-        constexpr entry_range<entry_type const, int> entries() const noexcept { return {{entries_.data(), disc_->tries + 1}, entries_.end().base()}; }
+        constexpr entry_range<entry_type      , int> entries()       noexcept { return {entries_, disc_->tries + 1}; }
+        constexpr entry_range<entry_type const, int> entries() const noexcept { return {entries_, disc_->tries + 1}; }
         constexpr entry<entry_type> add() noexcept {
             auto size = entries_.size();
             entries_.resize(size + disc_->tries + 1, -1);
