@@ -92,8 +92,32 @@ static void client() {
 }
 
 static void server() {
+    using dsa::server::file, dsa::server::all_files;
+    namespace fs = std::filesystem;
     // participants() & emplace()
-    assert(dsa::server::filename(disc.id()) == "10.dsa", "Filename");
+    assert(file(disc.id()).filename == "10.dsa", "Filename");
+    fs::create_directory("testing");
+    std::fstream{"testing/test.txt"};
+    fs::current_path("testing");
+    file(disc.id()).save({});
+    auto files = all_files();
+    assert(files.size() == 1 &&
+        files[0].first == dsa::discipline_id{1, 0} &&
+        files[0].second.filename == file(disc.id()).filename,
+        "Identify files correctly");
+    file(dsa::get_discipline({0, 0})->id()).save({});
+    files = all_files();
+    assert(files.size() == 2, "Identify all");
+    fs::current_path("..");
+    files = all_files("testing");
+    assert(files.size() == 2, "Identify all from parent");
+    fs::remove("testing/" + file(dsa::get_discipline({0, 0})->id()).filename);
+    files = all_files("testing");
+    assert(files.size() == 1 &&
+        files[0].first == dsa::discipline_id{1, 0} &&
+        files[0].second.filename == file(disc.id()).filename,
+        "Identify correctly from parent");
+    fs::remove_all("testing");
 }
 
 class server_status {
