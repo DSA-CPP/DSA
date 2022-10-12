@@ -99,13 +99,13 @@ class server_status {
 public:
     server_status(std::string_view sv) noexcept
     : sv_{sv} {
-        std::cout << sv << '\r';
+        std::cout << sv << '\r' << std::flush;
     }
 
     ~server_status() {
         for(auto s = sv_.size(); s--;)
             std::cout << ' ';
-        std::cout << '\r';
+        std::cout << '\r' << std::flush;
     }
 
 private:
