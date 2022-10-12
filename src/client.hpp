@@ -43,6 +43,7 @@ namespace dsa::client {
             auto ptr = reinterpret_cast<char *>(&buf);
             while(conn.recv({ptr, sizeof(buf)}) == sizeof(buf)) {
                 buf.first = net::endian(buf.first);
+                buf.second.age = net::endian(buf.second.age);
                 parts_.insert(buf);
             }
         }

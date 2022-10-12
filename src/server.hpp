@@ -15,15 +15,20 @@ namespace dsa::server {
         auto participants() const noexcept {
             std::vector<std::tuple<entry_type, participant, participant_data>> res;
             res.reserve(parts_.size());
-            for(auto && [id, part] : parts_)
-                res.emplace_back(net::endian(id), part, data_.at(id));
+            for(auto [id, part] : parts_) {
+                id = net::endian(id);
+                part.age = net::endian(part.age);
+                res.emplace_back(id, part, data_.at(id));
+            }
             return res;
         }
 
         bool emplace(entry_type id, participant part, participant_data const & data) noexcept {
             if(auto && [_, unique] = data_.emplace(id, data); !unique)
                 return false;
-            parts_.emplace_back(net::endian(id), part);
+            id = net::endian(id);
+            part.age = net::endian(part.age);
+            parts_.emplace_back(id, part);
             return true;
         }
 
