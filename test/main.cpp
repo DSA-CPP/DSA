@@ -88,11 +88,12 @@ static void client() {
     r = ctx.entries();
     assert(r.end() - *r.begin() == 12 && r.end() - 8 == e, "Add 2");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == invalid && e[2] == invalid, "Entry");
-    // save & load
+    // save() & load()
 }
 
 static void server() {
     // participants() & emplace()
+    assert(dsa::server::filename(disc.id()) == "10.dsa", "Filename");
 }
 
 class server_status {

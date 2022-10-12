@@ -42,6 +42,12 @@ namespace dsa::server {
         std::vector<pair> parts_; // network order
     };
 
+    constexpr std::string filename(discipline_id id) noexcept {
+        return std::string{static_cast<char>(id.section + '0'),
+            static_cast<char>(id.activity + '0'),
+            '.', 'd', 's', 'a'}; // fuck u optimizer
+    }
+
 }
 
 #endif
