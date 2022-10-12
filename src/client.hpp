@@ -33,11 +33,11 @@ namespace dsa::client {
             if(disc_)
                 save();
             disc_ = &disc;
-            io_.filename = station_name_ + '/' + dsa::name(disc) + ".dsa";
+            io_.filename = station_name_ + '/' + dsa::name(disc.id()) + ".dsa";
             io_.load(entries_);
         }
 
-        void load_participants(net::tcp::connection const & conn) noexcept {
+        void load_participants(net::tcp::connection const & conn) {
             parts_.clear();
             std::pair<entry_type, participant> buf;
             auto ptr = reinterpret_cast<char *>(&buf);

@@ -32,7 +32,7 @@ namespace dsa::server {
             return true;
         }
 
-        void send_participants(net::tcp::connection const & conn) const noexcept {
+        void send_participants(net::tcp::connection const & conn) const {
             conn.sendall({reinterpret_cast<char const *>(parts_.data()), parts_.size() * sizeof(pair)});
         }
 

@@ -67,7 +67,7 @@ constexpr void format() {
 }
 
 static void client() {
-    static_assert(dsa::name(disc) == "KraftWerfen");
+    static_assert(dsa::name(disc.id()) == "KraftWerfen");
     auto invalid = static_cast<dsa::entry_type>(-1);
     dsa::client::context ctx{"Test-Station"};
     assert(ctx.name() == "Test-Station", "New Context");

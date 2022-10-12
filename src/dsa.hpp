@@ -123,7 +123,9 @@ namespace dsa {
         };
     };
 
-    constexpr std::string name(discipline const & disc) noexcept { return std::string{disc.sections[disc.section]} + disc.activities[disc.section][disc.activity]; }
+    constexpr std::string name(discipline_id id) noexcept {
+        return std::string{discipline::sections[id.section]} + discipline::activities[id.section][id.activity];
+    }
 
     inline constexpr std::array<dsa::discipline, 15> disciplines{{
         {0, 0, format::MINUTES, 1, {
