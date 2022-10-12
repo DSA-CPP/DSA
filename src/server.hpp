@@ -47,7 +47,7 @@ namespace dsa::server {
         count_type section, activity;
         recv_to(section);
         recv_to(activity);
-        auto disc = get_discipline(net::endian(section), net::endian(activity));
+        auto disc = get_discipline({net::endian(section), net::endian(activity)});
         std::uint64_t size;
         recv_to(size);
         size = net::endian(size);

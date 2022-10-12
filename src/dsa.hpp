@@ -100,12 +100,19 @@ namespace dsa {
 
     constexpr auto & levels_for(participant part, requirements_array const & req) noexcept { return req[part.male][part.age / 2 - 5]; }
 
+    struct discipline_id {
+        dsa::count_type section;
+        dsa::count_type activity;
+        friend bool operator==(discipline_id lhs, discipline_id rhs) noexcept = default;
+    };
+
     struct discipline {
         dsa::count_type section;
         dsa::count_type activity;
         dsa::formatter format; // effectively a set of non-static member functions
         dsa::count_type tries;
         dsa::requirements_array requirements;
+        constexpr discipline_id id() const noexcept { return {section, activity}; }
         static constexpr char const * sections[4]{"Ausdauer", "Kraft", "Schnelligkeit", "Koordination"};
         static constexpr char const * activities[4][7]{
             {"Laufen", 0, 0, 0, "Schwimmen"},
@@ -113,7 +120,6 @@ namespace dsa {
             {"Laufen", "Schwimmen", 0, "Geraetturnen"},
             {"Hochsprung", "Weitsprung", 0, 0, "Schleuderball", "Seilspringen", "Geraetturnen"}
         };
-
     };
 
     constexpr std::string name(discipline const & disc) noexcept { return std::string{disc.sections[disc.section]} + disc.activities[disc.section][disc.activity]; }
@@ -181,9 +187,9 @@ namespace dsa {
         }}
     }};
 
-    constexpr discipline const * get_discipline(count_type section, count_type activity) noexcept {
+    constexpr discipline const * get_discipline(discipline_id id) noexcept {
         for(auto && disc : disciplines)
-            if(disc.section == section && disc.activity == activity)
+            if(disc.id() == id)
                 return &disc;
         return nullptr;
     }
