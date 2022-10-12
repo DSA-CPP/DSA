@@ -140,16 +140,12 @@ static void values(net::tcp::server const & s) {
     }};
     std::jthread st{[&]() {
         server_status ss{"values() ..."};
-        auto [d, e] = dsa::server::receive_values(s);
+        auto [d, e] = dsa::receive_values(s);
         assert(d == disc.id() && e.size() == entries.size() &&
             !std::memcmp(e.data(), entries.data(), entries.size() * sizeof(dsa::entry_type)),
             "Receive entries");
     }};
-    dsa::client::context ctx{"Test-Station 3"};
-    ctx.load(disc);
-    for(std::size_t i{}; i < entries.size(); i += 4)
-        std::memcpy(ctx.add(), &entries[i], 4 * sizeof(dsa::entry_type));
-    ctx.send_values(ep);
+    dsa::send_values(ep, disc.id(), entries);
 }
 
 int main() try {

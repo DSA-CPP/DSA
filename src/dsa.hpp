@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <ranges>
+#include "NETpp/tcp.hpp"
 #include "utility.hpp"
 
 #define MAX_REQ   {static_cast<dsa::entry_type>(-1), static_cast<dsa::entry_type>(-1), static_cast<dsa::entry_type>(-1)}
@@ -192,6 +193,32 @@ namespace dsa {
             if(disc.id() == id)
                 return &disc;
         return nullptr;
+    }
+
+    // values in network-order
+    inline void send_values(net::tcp::connection const & conn, discipline_id id, std::span<entry_type const> vals) {
+        char buf[2 * sizeof(count_type) + sizeof(std::uint64_t)];
+        reinterpret_cast<count_type *>(buf)[0] = net::endian(id.section);
+        reinterpret_cast<count_type *>(buf)[1] = net::endian(id.activity);
+        *reinterpret_cast<std::uint64_t *>(buf + 2 * sizeof(count_type)) = net::endian<std::uint64_t>(vals.size());
+        conn.sendall(buf);
+        conn.sendall({reinterpret_cast<char const *>(vals.data()), vals.size_bytes()});
+    }
+
+    // values still in network-order
+    inline std::pair<discipline_id, std::vector<entry_type>> receive_values(net::tcp::connection const & conn) {
+        auto ptr = [](auto & val) { return reinterpret_cast<char *>(&val); };
+        auto recv = [&](auto buf) { // TODO (may halt)
+            conn.recvall({ptr(buf), sizeof(buf)});
+            return net::endian(buf);
+        };
+        auto section = recv(count_type{});
+        auto activity = recv(count_type{});
+        auto size = recv(std::uint64_t{});
+        std::vector<entry_type> entries;
+        entries.resize(size);
+        conn.recvall({ptr(entries[0]), size * sizeof(entry_type)}); // TODO (may halt aswell)
+        return {{section, activity}, std::move(entries)};
     }
 
 }
