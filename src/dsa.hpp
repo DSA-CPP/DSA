@@ -181,6 +181,13 @@ namespace dsa {
         }}
     }};
 
+    constexpr discipline const * get_discipline(count_type section, count_type activity) noexcept {
+        for(auto && disc : disciplines)
+            if(disc.section == section && disc.activity == activity)
+                return &disc;
+        return nullptr;
+    }
+
 }
 
 #undef MAX_REQ

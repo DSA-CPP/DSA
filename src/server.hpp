@@ -39,21 +39,15 @@ namespace dsa::server {
         std::vector<pair> parts_; // network order
     };
 
-    std::pair<discipline const *, std::vector<entry_type>> receive_values(net::tcp::connection const & conn) {
+    inline std::pair<discipline const *, std::vector<entry_type>> receive_values(net::tcp::connection const & conn) {
         auto ptr = [](auto & val) { return reinterpret_cast<char *>(&val); };
         auto recv_to = [&](auto & buf) { // TODO (may halt)
             conn.recvall({ptr(buf), sizeof(buf)});
         };
-        count_type section, activity; // one byte -> no net-order
+        count_type section, activity;
         recv_to(section);
         recv_to(activity);
-        discipline const * disc{};
-        for(auto && d : disciplines) {
-            if(d.section != section || d.activity != activity)
-                continue;
-            disc = &d;
-            break;
-        }
+        auto disc = get_discipline(net::endian(section), net::endian(activity));
         std::uint64_t size;
         recv_to(size);
         size = net::endian(size);
