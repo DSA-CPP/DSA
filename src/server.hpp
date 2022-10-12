@@ -42,10 +42,24 @@ namespace dsa::server {
         std::vector<pair> parts_; // network order
     };
 
-    constexpr std::string filename(discipline_id id) noexcept {
-        return std::string{static_cast<char>(id.section + '0'),
+    constexpr io<entry_type> file(discipline_id id) noexcept {
+        return {{static_cast<char>(id.section + '0'),
             static_cast<char>(id.activity + '0'),
-            '.', 'd', 's', 'a'}; // fuck u optimizer
+            '.', 'd', 's', 'a'}}; // fuck u optimizer
+    }
+
+    inline std::vector<std::pair<discipline_id, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
+        std::vector<std::pair<discipline_id, io<entry_type>>> res;
+        for(auto && f : std::filesystem::directory_iterator{dir}) {
+            if(f.is_directory())
+                continue;
+            auto path = f.path().filename().string();
+            if(path.length() != 6 || !path.ends_with(".dsa"))
+                continue;
+            discipline_id id{static_cast<count_type>(path[0] - '0'), static_cast<count_type>(path[1] - '0')};
+            res.emplace_back(id, path);
+        }
+        return res;
     }
 
 }
