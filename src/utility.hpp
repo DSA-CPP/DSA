@@ -57,12 +57,23 @@ namespace dsa {
     };
 
     template<typename T, std::integral U>
-    struct entry_range {
-        entry_iterator<T, U> begin_;
-        T * end_;
+    class entry_range {
+    public:
+        constexpr entry_range(entry_iterator<T, U> begin, T * end) noexcept : begin_{begin}, end_{end} {}
         constexpr auto begin() const noexcept { return begin_; }
         constexpr auto   end() const noexcept { return end_; }
+    private:
+        entry_iterator<T, U> begin_;
+        T * end_;
     };
+
+    template<typename T, typename U>
+    constexpr entry<T> entry_of(entry_range<T, U> range, auto && id) noexcept {
+        for(auto e : range)
+            if(e.id() == id)
+                return e;
+        return {};
+    }
 
     template<typename T>
     class io {

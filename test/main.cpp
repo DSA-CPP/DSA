@@ -81,10 +81,10 @@ static void client() {
     e[0] = 500;
     r = ctx.entries();
     assert(r.end() - *r.begin() == 8 && r.end() - 4 == e, "Add");
-    auto e2 = ctx.entry_of(42069);
+    auto e2 = dsa::entry_of(ctx.entries(), 42069);
     assert(e == e2, "Entry of ID");
     assert(ctx.add().id() == invalid, "Empty Entry");
-    e = ctx.entry_of(42069);
+    e = dsa::entry_of(ctx.entries(), 42069);
     r = ctx.entries();
     assert(r.end() - *r.begin() == 12 && r.end() - 8 == e, "Add 2");
     assert(e.id() == 42069 && e[0] == 500 && e[1] == invalid && e[2] == invalid, "Entry");
