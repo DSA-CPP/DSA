@@ -141,7 +141,7 @@ static void values(net::tcp::server const & s) {
     std::jthread st{[&]() {
         server_status ss{"values() ..."};
         auto [d, e] = dsa::server::receive_values(s);
-        assert(d == &disc && e.size() == entries.size() &&
+        assert(d == disc.id() && e.size() == entries.size() &&
             !std::memcmp(e.data(), entries.data(), entries.size() * sizeof(dsa::entry_type)),
             "Receive entries");
     }};
