@@ -65,8 +65,9 @@ namespace dsa::server {
         }
         std::uint64_t size;
         recv_to(size);
+        size = net::endian(size);
         std::vector<entry_type> entries;
-        entries.resize(net::endian(size));
+        entries.resize(size);
         conn.recvall({ptr(entries[0]), size * sizeof(entry_type)}); // TODO (may halt aswell)
         return {disc, std::move(entries)};
     }

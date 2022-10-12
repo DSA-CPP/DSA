@@ -11,7 +11,7 @@ namespace dsa::client {
     class context {
     public:
         template<typename T>
-        context(T && name) noexcept : station_name_{std::forward<T>(name)} {
+        explicit context(T && name) noexcept : station_name_{std::forward<T>(name)} {
             std::filesystem::create_directory(station_name_); // might throw
         }
 
@@ -46,6 +46,15 @@ namespace dsa::client {
                 buf.first = net::endian(buf.first);
                 parts_.insert(buf);
             }
+        }
+
+        void send_values(net::tcp::connection const & conn) noexcept {
+            char buf[2 * sizeof(count_type) + sizeof(std::uint64_t)];
+            reinterpret_cast<count_type *>(buf)[0] = disc_->section;
+            reinterpret_cast<count_type *>(buf)[1] = disc_->activity;
+            *reinterpret_cast<std::uint64_t *>(buf + 2 * sizeof(count_type)) = net::endian<std::uint64_t>(entries_.size());
+            conn.sendall(buf);
+            conn.sendall({(char *) entries_.data(), entries_.size() * sizeof(entry_type)});
         }
 
     private:
