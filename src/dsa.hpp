@@ -194,6 +194,25 @@ namespace dsa {
         return nullptr;
     }
 
+    namespace detail {
+
+        inline char * ptr(auto & val) noexcept {
+            return (char *) &val;
+        }
+
+        inline net::out_buffer out(auto const & buf) {
+            return {ptr(buf), sizeof(buf)};
+        }
+
+        template<typename T>
+        [[nodiscard]] inline T recv(net::tcp::connection const & conn) {
+            T buf;
+            conn.recvall({ptr(buf), sizeof(buf)}); // TODO (may halt)
+            return net::endian(buf);
+        }
+
+    }
+
     // values in network-order
     inline void send_values(net::tcp::connection const & conn, discipline_id id, std::span<entry_type const> vals) {
         char buf[2 * sizeof(count_type) + sizeof(std::uint64_t)];
@@ -201,19 +220,15 @@ namespace dsa {
         reinterpret_cast<count_type *>(buf)[1] = net::endian(id.activity);
         *reinterpret_cast<std::uint64_t *>(buf + 2 * sizeof(count_type)) = net::endian<std::uint64_t>(vals.size());
         conn.sendall(buf);
-        conn.sendall({reinterpret_cast<char const *>(vals.data()), vals.size_bytes()});
+        conn.sendall({detail::ptr(vals[0]), vals.size_bytes()});
     }
 
     // values still in network-order
     [[nodiscard]] inline std::pair<discipline_id, std::vector<entry_type>> receive_values(net::tcp::connection const & conn, std::vector<entry_type> && entries = {}) {
-        auto ptr = [](auto & val) { return reinterpret_cast<char *>(&val); };
-        auto recv = [&](auto buf) { // TODO (may halt)
-            conn.recvall({ptr(buf), sizeof(buf)});
-            return net::endian(buf);
-        };
-        auto section = recv(count_type{});
-        auto activity = recv(count_type{});
-        auto size = recv(std::uint64_t{});
+        using namespace detail;
+        auto section = recv<count_type>(conn);
+        auto activity = recv<count_type>(conn);
+        auto size = recv<std::uint64_t>(conn);
         auto prev_size = entries.size();
         entries.resize(prev_size + size);
         conn.recvall({ptr(entries[prev_size]), size * sizeof(entry_type)}); // TODO (may halt aswell)

@@ -35,7 +35,7 @@ namespace dsa::server {
         }
 
         void send_participants(net::tcp::connection const & conn) const {
-            conn.sendall({reinterpret_cast<char const *>(parts_.data()), parts_.size() * sizeof(pair)});
+            conn.sendall({detail::ptr(parts_[0]), parts_.size() * sizeof(pair)});
         }
 
     private:
