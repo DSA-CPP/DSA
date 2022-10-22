@@ -67,6 +67,7 @@ namespace dsa::server {
     }
 
     class participant_values {
+    using const_iterator = std::vector<discipline const *>::const_iterator;
     public:
         participant_values(entry_type id, std::string_view dir = ".") {
             std::vector<entry_type> buf;
@@ -80,18 +81,19 @@ namespace dsa::server {
             }
         }
 
-        void send(net::tcp::connection const & conn) const noexcept {
-            conn.sendall(detail::out<std::uint64_t>(net::endian(discs_.size())));
-            for(dsa::result_iterator it{discs_.begin(), data_.data()}; it != discs_.end(); ++it) {
-                auto && [d, e] = *it;
-                dsa::send_values(conn, d.id(), {e + 1, d.tries});
-            }
-        }
-
+        constexpr auto size() const noexcept { return discs_.size(); }
+        constexpr result_iterator<const_iterator, entry_type const> begin() const noexcept { return {discs_.begin(), data_.data()}; }
+        constexpr auto end() const noexcept { return discs_.end(); }
     private:
         std::vector<discipline const *> discs_;
         std::vector<entry_type> data_;
     };
+
+    inline void send(net::tcp::connection const & conn, auto const & results, std::uint64_t size) {
+        conn.sendall(detail::out(net::endian(size)));
+        for(auto && [d, e] : results)
+            send_values(conn, d.id(), {e + 1, d.tries});
+    }
 
 }
 
