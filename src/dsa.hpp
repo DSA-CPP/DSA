@@ -124,6 +124,18 @@ namespace dsa {
         return std::string{discipline::sections[id.section]} + discipline::activities[id.section][id.activity];
     }
 
+    template<typename DiscPtrIt, typename EntryT>
+    class result_iterator {
+    public:
+        constexpr result_iterator(DiscPtrIt it, EntryT * ptr) noexcept : it_{it}, ptr_{ptr} {}
+        constexpr bool operator!=(DiscPtrIt sentinel) const noexcept { return it_ != sentinel; }
+        constexpr auto & operator++() noexcept { return ptr_ += (*it_)->tries, ++it_, *this; }
+        constexpr std::pair<discipline const &, entry<EntryT>> operator*() const noexcept { return {**it_, ptr_}; }
+    private:
+        DiscPtrIt it_;
+        EntryT * ptr_;
+    };
+
     inline constexpr std::array<dsa::discipline, 15> disciplines{{
         {0, 0, format::MINUTES, 1, {
             {{520, 440, 400}, {510, 425, 345}, {500, 420, 335}, {450, 405, 325}, {2050, 1850, 1650}, {2020, 1820, 1620}},
