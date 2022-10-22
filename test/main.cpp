@@ -174,6 +174,40 @@ static void values(net::tcp::server const & s) {
     dsa::send_values(ep, disc.id(), entries);
 }
 
+struct range {
+public:
+    static constexpr auto size() noexcept { return discs.size(); }
+    constexpr auto begin() const noexcept { return dsa::result_iterator{discs.begin(), vals.data()}; }
+    constexpr auto end() const noexcept { return discs.end(); }
+private:
+    static constexpr std::array<dsa::discipline const *, 3> discs{{
+        &dsa::disciplines[0],
+        &dsa::disciplines[1],
+        &dsa::disciplines[2]
+    }};
+    static constexpr std::array<dsa::entry_type, 5> vals{{
+        1,
+        invalid,
+        17, invalid, invalid
+    }};
+};
+
+static void individual_values(net::tcp::server const & s) {
+    std::jthread st{[&]() {
+        net::tcp::connection c{s};
+        assert(dsa::detail::recv<dsa::entry_type>(c) == 0, "Request ID");
+        dsa::server::send(c, range{}, range::size());
+    }};
+    dsa::client::discipline_results results{ep, 0};
+    for(auto it = range{}.begin(); auto && [rd, re] : results) {
+        assert((it != range{}.end()) == true, "Complete receive");
+        auto && [td, te] = *it;
+        assert(&rd == &td, "Correct discipline");
+        assert(std::memcmp(re, te, rd.tries), "Correct values");
+        ++it;
+    }
+}
+
 int main() try {
     io();
     format();
@@ -183,6 +217,7 @@ int main() try {
     net::tcp::server server{ep, 1};
     participants(server);
     values(server);
+    individual_values(server);
 } catch(char const * e) {
     std::cout << "Failed at: " << e << std::endl;
     return -1;
