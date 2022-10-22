@@ -103,7 +103,7 @@ static void server() {
     file(disc.id()).save({});
     auto files = all_files();
     assert(files.size() == 1 &&
-        files[0].first == dsa::discipline_id{1, 0} &&
+        files[0].first->id() == dsa::discipline_id{1, 0} &&
         files[0].second.filename == file(disc.id()).filename,
         "Identify files correctly");
     file(dsa::get_discipline({0, 0})->id()).save({});
@@ -115,7 +115,7 @@ static void server() {
     fs::remove("testing/" + file(dsa::get_discipline({0, 0})->id()).filename);
     files = all_files("testing");
     assert(files.size() == 1 &&
-        files[0].first == dsa::discipline_id{1, 0} &&
+        files[0].first->id() == dsa::discipline_id{1, 0} &&
         files[0].second.filename == file(disc.id()).filename,
         "Identify correctly from parent");
     fs::remove_all("testing");
