@@ -82,6 +82,7 @@ namespace dsa::client {
         constexpr result_iterator<const_iterator, entry_type const> begin() const noexcept { return {discs_.begin(), data_.data()}; }
         constexpr auto end()       noexcept { return discs_.end(); }
         constexpr auto end() const noexcept { return discs_.end(); }
+        constexpr auto size() const noexcept { return discs_.size(); }
     private:
         std::vector<discipline const *> discs_;
         std::vector<entry_type> data_;

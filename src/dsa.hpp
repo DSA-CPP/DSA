@@ -130,7 +130,7 @@ namespace dsa {
         constexpr result_iterator(DiscPtrIt it, EntryT * ptr) noexcept : it_{it}, ptr_{ptr} {}
         constexpr bool operator!=(DiscPtrIt sentinel) const noexcept { return it_ != sentinel; }
         constexpr auto & operator++() noexcept { return ptr_ += (*it_)->tries, ++it_, *this; }
-        constexpr std::pair<discipline const &, entry<EntryT>> operator*() const noexcept { return {**it_, ptr_}; }
+        constexpr std::pair<discipline const &, EntryT *> operator*() const noexcept { return {**it_, ptr_}; }
     private:
         DiscPtrIt it_;
         EntryT * ptr_;
