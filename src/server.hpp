@@ -1,6 +1,7 @@
 #ifndef _DSA_SERVER_HPP_
 #define _DSA_SERVER_HPP_
 
+#include <filesystem>
 #include <tuple>
 #include <unordered_map>
 #include "dsa.hpp"
@@ -11,9 +12,10 @@ namespace dsa::server {
 
     class context {
     using pair = std::pair<entry_type, participant>;
+    using tuple = std::tuple<entry_type, participant, participant_data>;
     public:
-        auto participants() const noexcept {
-            std::vector<std::tuple<entry_type, participant, participant_data>> res;
+        [[nodiscard]] std::vector<tuple> participants() const noexcept {
+            std::vector<tuple> res;
             res.reserve(parts_.size());
             for(auto [id, part] : parts_) {
                 id = net::endian(id);
@@ -42,14 +44,14 @@ namespace dsa::server {
         std::vector<pair> parts_; // network order
     };
 
-    constexpr io<entry_type> file(discipline_id id) noexcept {
+    [[nodiscard]] constexpr io<entry_type> file(discipline_id id) noexcept {
         return {{static_cast<char>(id.section + '0'),
             static_cast<char>(id.activity + '0'),
             '.', 'd', 's', 'a'}}; // fuck u optimizer
     }
 
     // only valid names of known disciplines
-    inline std::vector<std::pair<discipline_id, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
+    [[nodiscard]] inline std::vector<std::pair<discipline_id, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
         std::vector<std::pair<discipline_id, io<entry_type>>> res;
         for(auto && f : std::filesystem::directory_iterator{dir}) {
             if(f.is_directory())

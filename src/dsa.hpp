@@ -19,9 +19,6 @@ namespace dsa {
     using level_array = std::array<entry_type, 3>; // bronce, silver, gold
     using requirements_array = level_array[2][6]; // 10-11, 12-13, 14-15, 16-17, 18-19, 20-21 | male, female
 
-    inline constexpr std::uint16_t port = 50'000;
-    inline constexpr char const * service = "50000";
-
     enum class score : count_type {
         NOTHING,
         BRONCE,
@@ -123,7 +120,7 @@ namespace dsa {
         };
     };
 
-    constexpr std::string name(discipline_id id) noexcept {
+    [[nodiscard]] constexpr std::string name(discipline_id id) noexcept {
         return std::string{discipline::sections[id.section]} + discipline::activities[id.section][id.activity];
     }
 
@@ -208,7 +205,7 @@ namespace dsa {
     }
 
     // values still in network-order
-    inline std::pair<discipline_id, std::vector<entry_type>> receive_values(net::tcp::connection const & conn) {
+    [[nodiscard]] inline std::pair<discipline_id, std::vector<entry_type>> receive_values(net::tcp::connection const & conn) {
         auto ptr = [](auto & val) { return reinterpret_cast<char *>(&val); };
         auto recv = [&](auto buf) { // TODO (may halt)
             conn.recvall({ptr(buf), sizeof(buf)});

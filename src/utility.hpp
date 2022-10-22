@@ -92,7 +92,7 @@ namespace dsa {
             if(!file) buffer.clear();
         }
 
-        std::vector<T> load() const noexcept {
+        [[nodiscard]] std::vector<T> load() const noexcept {
             std::vector<T> vec;
             load(vec);
             return vec;
