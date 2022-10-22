@@ -58,6 +58,35 @@ namespace dsa::client {
         dsa::discipline const * disc_{};
     };
 
+    class discipline_results {
+    using iterator = std::vector<discipline const *>::iterator;
+    using const_iterator = std::vector<discipline const *>::const_iterator;
+    public:
+        discipline_results(net::tcp::connection const & conn, entry_type id) {
+            using namespace detail;
+            conn.sendall(out(net::endian(id)));
+            auto size = recv<std::uint64_t>(conn);
+            discs_.reserve(size);
+            while(size--) {
+                try {
+                    auto [id, data] = receive_values(conn, std::move(data_));
+                    discs_.emplace_back(get_discipline(id)); // asserts exists
+                    data_ = std::move(data);
+                } catch(std::exception const &) {
+                    break;
+                }
+            }
+        }
+
+        constexpr result_iterator<      iterator, entry_type      > begin()       noexcept { return {discs_.begin(), data_.data()}; }
+        constexpr result_iterator<const_iterator, entry_type const> begin() const noexcept { return {discs_.begin(), data_.data()}; }
+        constexpr auto end()       noexcept { return discs_.end(); }
+        constexpr auto end() const noexcept { return discs_.end(); }
+    private:
+        std::vector<discipline const *> discs_;
+        std::vector<entry_type> data_;
+    };
+
 }
 
 #endif // _DSA_CLIENT_HPP_

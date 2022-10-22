@@ -50,9 +50,9 @@ namespace dsa::server {
             '.', 'd', 's', 'a'}}; // fuck u optimizer
     }
 
-    // only valid names of known disciplines
-    [[nodiscard]] inline std::vector<std::pair<discipline_id, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
-        std::vector<std::pair<discipline_id, io<entry_type>>> res;
+    // pointers are valid
+    [[nodiscard]] inline std::vector<std::pair<discipline const *, io<entry_type>>> all_files(std::filesystem::path const & dir = ".") noexcept {
+        std::vector<std::pair<discipline const *, io<entry_type>>> res;
         for(auto && f : std::filesystem::directory_iterator{dir}) {
             if(f.is_directory())
                 continue;
@@ -60,12 +60,38 @@ namespace dsa::server {
             if(path.length() != 6 || !path.ends_with(".dsa"))
                 continue;
             discipline_id id{static_cast<count_type>(path[0] - '0'), static_cast<count_type>(path[1] - '0')};
-            if(!get_discipline(id))
-                continue;
-            res.emplace_back(id, path);
+            if(auto ptr = get_discipline(id); ptr)
+                res.emplace_back(ptr, path);
         }
         return res;
     }
+
+    class participant_values {
+    public:
+        participant_values(entry_type id, std::string_view dir = ".") {
+            std::vector<entry_type> buf;
+            for(auto && [ptr, io] : all_files(dir)) {
+                io.load(buf);
+                auto entry = find_entry<entry_type, int>({buf, ptr->tries + 1}, id);
+                if(!entry)
+                    continue;
+                discs_.push_back(ptr);
+                data_.insert(data_.end(), entry + 1, entry + 1 + ptr->tries);
+            }
+        }
+
+        void send(net::tcp::connection const & conn) const noexcept {
+            conn.sendall(detail::out<std::uint64_t>(net::endian(discs_.size())));
+            for(dsa::result_iterator it{discs_.begin(), data_.data()}; it != discs_.end(); ++it) {
+                auto && [d, e] = *it;
+                dsa::send_values(conn, d.id(), {e + 1, d.tries});
+            }
+        }
+
+    private:
+        std::vector<discipline const *> discs_;
+        std::vector<entry_type> data_;
+    };
 
 }
 
